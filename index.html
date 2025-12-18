@@ -42,7 +42,6 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .sidebar-collapsed .sidebar-text { display: none; }
         
-        /* Animaciones Personalizadas */
         .btn-hover-effect { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-hover-effect:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
         .btn-hover-effect:active { transform: translateY(0) scale(0.95); }
@@ -50,12 +49,22 @@
         .row-hover-effect { transition: all 0.2s ease-out; border-left: 3px solid transparent; }
         .row-hover-effect:hover { background-color: white; transform: scale(1.005); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border-left-color: #0d9488; z-index: 10; position: relative; }
 
-        /* Modal Animation */
-        @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .modal-animate { animation: modalIn 0.2s ease-out forwards; }
+        
+        .group-box { @apply border border-slate-200 rounded-xl p-4 bg-slate-50/50 mb-4; }
+        .group-title { @apply text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 border-b border-slate-200 pb-1; }
+        
+        /* New Toggle Switch Style */
+        .toggle-switch { display: flex; align-items: center; cursor: pointer; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 2px; background: white; transition: all 0.2s; }
+        .toggle-switch.active { border-color: #14b8a6; background: #f0fdfa; }
+        .toggle-option { padding: 2px 8px; font-size: 10px; font-weight: 700; border-radius: 0.3rem; transition: all 0.2s; }
+        .toggle-switch .on { background: #14b8a6; color: white; }
+        .toggle-switch .off { background: #e2e8f0; color: #64748b; }
+        .toggle-switch.active .on { opacity: 1; }
+        .toggle-switch.active .off { background: transparent; color: #14b8a6; }
+        .toggle-switch:not(.active) .on { background: transparent; color: #94a3b8; }
+        .toggle-switch:not(.active) .off { background: #e2e8f0; color: #64748b; }
     </style>
 </head>
 <body class="text-slate-600 h-screen overflow-hidden selection:bg-turquoise-200 selection:text-turquoise-900">
@@ -118,10 +127,7 @@
         };
 
         const ESTADOS = {
-            pendiente: { label: 'Pendiente', icon: Icons.Clock, color: 'text-slate-600 bg-slate-100' },
-            preoperatorio: { label: 'Pre-Op', icon: Icons.FileText, color: 'text-turquoise-600 bg-turquoise-50' },
-            programado: { label: 'Programado', icon: Icons.AlertCircle, color: 'text-blue-600 bg-blue-50' },
-            operado: { label: 'Operado', icon: Icons.CheckCircle, color: 'text-clinical-600 bg-clinical-50' },
+            activo: { label: 'Activo', icon: Icons.Clock, color: 'text-blue-600 bg-blue-50' },
             suspension: { label: 'Suspensión', icon: Icons.AlertCircle, color: 'text-orange-600 bg-orange-100' },
             baja: { label: 'De Baja', icon: Icons.X, color: 'text-red-600 bg-red-100' },
         };
@@ -164,9 +170,11 @@
 
         // --- COMPONENTES UI HELPERS ---
         const ToggleBtn = ({ label, active, onClick }) => (
-            <button type="button" onClick={onClick} className={`toggle-btn ${active ? 'active' : 'inactive'}`}>
-                {label}
-            </button>
+            <div className={`toggle-switch ${active ? 'active' : ''}`} onClick={onClick}>
+                <div className="text-[10px] font-bold text-slate-500 px-2 mr-1">{label}</div>
+                <div className={`toggle-option ${active ? 'off' : 'on'}`}>NO</div>
+                <div className={`toggle-option ${active ? 'on' : 'off'}`}>SI</div>
+            </div>
         );
 
         const DynamicList = ({ items, onChange, placeholder }) => {
@@ -319,7 +327,7 @@
             // EXPEDIENTE STATE
             const initialExp = { 
                 // G1
-                fechaSolicitud: '', expediente: '', servicioId: '', specialtyId: '', doctorId: '', 
+                fechaSolicitud: '', servicioId: '', specialtyId: '', doctorId: '', 
                 diagnosticos: [''], procedimientos: [''], prioridad: 'P3', tipoCirugia: '1. CMA', tipoAnestesia: 'General', 
                 apoyoRadiologia: false, apoyoBiopsia: false, apoyoSangre: false, sangreUnidades: '', sangreGrupo: '', sangreRH: '',
                 // G2 (Admin)
@@ -330,10 +338,10 @@
                 ekgSolicitado: false, ekgFechaSol: '', ekgRealizado: false, ekgFechaReal: '',
                 anesSolicitado: false, anesFechaSol: '', anesRealizado: false, anesFechaReal: '',
                 preOpRealizado: false, donacionSangre: false,
-                interconsultas: [ { tipo: '', fecha: '', cumplio: false }, { tipo: '', fecha: '', cumplio: false }, { tipo: '', fecha: '', cumplio: false } ],
+                interconsultas: [ { tipo: '', fechaSolicitud: '', cumplio: false, fechaCumplio: '' }, { tipo: '', fechaSolicitud: '', cumplio: false, fechaCumplio: '' }, { tipo: '', fechaSolicitud: '', cumplio: false, fechaCumplio: '' } ],
                 // G4 (Status)
                 fechaEnvioComite: '', fechaProg: '', fechaRealizacion: '',
-                estado: 'pendiente', causaSuspension: '', causaBaja: '',
+                estado: 'activo', causaSuspension: '', fechaSuspension: '', causaBaja: '', fechaBaja: '',
                 observaciones: ''
             };
             const [expData, setExpData] = useState(initialExp); const [showExpForm, setShowExpForm] = useState(false); const [editingExpId, setEditingExpId] = useState(null);
@@ -409,8 +417,6 @@
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Fecha Solicitud</label><input type="date" required className="w-full p-2 rounded-lg border text-sm" value={expData.fechaSolicitud} onChange={e=>handleExpChange('fechaSolicitud', e.target.value)} /></div>
                                         <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Prioridad</label><select className="w-full p-2 rounded-lg border text-sm" value={expData.prioridad} onChange={e=>handleExpChange('prioridad', e.target.value)}>{Object.entries(PRIORIDADES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select></div>
-                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">No. Expediente</label><input type="text" required className="w-full p-2 rounded-lg border text-sm" value={expData.expediente} onChange={e=>handleExpChange('expediente', e.target.value)} placeholder="Físico..." /></div>
-                                        
                                         <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Servicio</label><select required className="w-full p-2 rounded-lg border text-sm" value={expData.servicioId} onChange={e=>setExpData(p=>({...p, servicioId:e.target.value, specialtyId:'', doctorId:''}))}><option value="">Seleccione...</option>{services.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
                                         <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Especialidad</label><select required className="w-full p-2 rounded-lg border text-sm" value={expData.specialtyId} onChange={e=>setExpData(p=>({...p, specialtyId:e.target.value, doctorId:''}))} disabled={!expData.servicioId}><option value="">Seleccione...</option>{availableSpecialties.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
                                         <div><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Médico</label><select required className="w-full p-2 rounded-lg border text-sm" value={expData.doctorId} onChange={e=>handleExpChange('doctorId', e.target.value)} disabled={!expData.specialtyId}><option value="">Seleccione...</option>{availableDoctors.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
@@ -471,11 +477,14 @@
                                     </div>
                                     <div className="mt-4"><label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Interconsultas (3 Campos)</label>
                                         {[0,1,2].map(i => (
-                                            <div key={i} className="flex gap-2 mb-2 items-center bg-white p-2 rounded border">
+                                            <div key={i} className="flex gap-2 mb-2 items-center bg-white p-2 rounded border flex-wrap">
                                                 <span className="text-xs font-bold text-slate-400 w-4">{i+1}.</span>
-                                                <select className="flex-1 p-1 text-xs border rounded" value={expData.interconsultas[i]?.tipo} onChange={e=>handleInterChange(i, 'tipo', e.target.value)}><option value="">Tipo...</option>{interconsultas.map(ic=><option key={ic.id} value={ic.name}>{ic.name}</option>)}</select>
-                                                <input type="date" className="w-32 p-1 text-xs border rounded" value={expData.interconsultas[i]?.fecha} onChange={e=>handleInterChange(i, 'fecha', e.target.value)} />
+                                                <select className="flex-1 p-1 text-xs border rounded min-w-[100px]" value={expData.interconsultas[i]?.tipo} onChange={e=>handleInterChange(i, 'tipo', e.target.value)}><option value="">Tipo...</option>{interconsultas.map(ic=><option key={ic.id} value={ic.name}>{ic.name}</option>)}</select>
+                                                <input type="date" className="w-32 p-1 text-xs border rounded" placeholder="Fecha Solicitud" value={expData.interconsultas[i]?.fechaSolicitud} onChange={e=>handleInterChange(i, 'fechaSolicitud', e.target.value)} />
                                                 <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={expData.interconsultas[i]?.cumplio} onChange={e=>handleInterChange(i, 'cumplio', e.target.checked)} /> Cumplió</label>
+                                                {expData.interconsultas[i]?.cumplio && (
+                                                    <input type="date" className="w-32 p-1 text-xs border rounded bg-green-50" placeholder="Fecha Cumplimiento" value={expData.interconsultas[i]?.fechaCumplio} onChange={e=>handleInterChange(i, 'fechaCumplio', e.target.value)} />
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -494,8 +503,22 @@
                                             {Object.entries(ESTADOS).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
                                         </select>
                                     </div>
-                                    {expData.estado === 'suspension' && <div className="mt-2"><label className="text-[10px] font-bold block">Causa Suspensión</label><select className="w-full p-2 border rounded text-sm" value={expData.causaSuspension} onChange={e=>handleExpChange('causaSuspension',e.target.value)}><option value="">Seleccione...</option><option value="Causas Clínicas">Causas Clínicas</option><option value="A petición del paciente">A petición del paciente</option></select></div>}
-                                    {expData.estado === 'baja' && <div className="mt-2"><label className="text-[10px] font-bold block">Causa Baja</label><select className="w-full p-2 border rounded text-sm" value={expData.causaBaja} onChange={e=>handleExpChange('causaBaja',e.target.value)}><option value="">Seleccione...</option><option value="Realización de la cirugía">Realización de la cirugía</option><option value="A petición del paciente">A petición del paciente</option><option value="Desaparición de la necesidad">Desaparición de la necesidad</option><option value="Vencimientos del derecho">Vencimientos del derecho</option><option value="Otras">Otras</option></select></div>}
+                                    {expData.estado === 'suspension' && (
+                                        <div className="mt-3 bg-orange-50 p-3 rounded-lg border border-orange-100">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div><label className="text-[10px] font-bold block text-orange-700">Fecha Inicio Suspensión</label><input type="date" className="w-full p-2 border rounded text-sm" value={expData.fechaSuspension} onChange={e=>handleExpChange('fechaSuspension',e.target.value)} required /></div>
+                                                <div><label className="text-[10px] font-bold block text-orange-700">Causa Suspensión</label><select className="w-full p-2 border rounded text-sm" value={expData.causaSuspension} onChange={e=>handleExpChange('causaSuspension',e.target.value)} required><option value="">Seleccione...</option><option value="Causas Clínicas">Causas Clínicas</option><option value="A petición del paciente">A petición del paciente</option></select></div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {expData.estado === 'baja' && (
+                                        <div className="mt-3 bg-red-50 p-3 rounded-lg border border-red-100">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div><label className="text-[10px] font-bold block text-red-700">Fecha de Baja</label><input type="date" className="w-full p-2 border rounded text-sm" value={expData.fechaBaja} onChange={e=>handleExpChange('fechaBaja',e.target.value)} required /></div>
+                                                <div><label className="text-[10px] font-bold block text-red-700">Causa Baja</label><select className="w-full p-2 border rounded text-sm" value={expData.causaBaja} onChange={e=>handleExpChange('causaBaja',e.target.value)} required><option value="">Seleccione...</option><option value="Realización de la cirugía">Realización de la cirugía</option><option value="A petición del paciente">A petición del paciente</option><option value="Desaparición de la necesidad">Desaparición de la necesidad</option><option value="Vencimientos del derecho">Vencimientos del derecho</option><option value="Otras">Otras</option></select></div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div><label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Observaciones Generales</label><textarea rows="3" className="w-full p-3 rounded-xl border border-slate-200 text-sm" value={expData.observaciones} onChange={e=>handleExpChange('observaciones',e.target.value)}></textarea></div>
@@ -514,9 +537,14 @@
                             <div className="flex items-center gap-2 mb-3 mt-8"><span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Historial Clínico</span><div className="h-px bg-slate-200 flex-1"></div></div>
                             <div className="grid gap-3">
                                 {patientExpedientes.map(exp => (
-                                    <div key={exp.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-4">
+                                    <div key={exp.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:border-turquoise-200 hover:shadow-md transition-all flex flex-col sm:flex-row gap-4">
                                         <div className="flex-1">
-                                            <div className="flex flex-wrap items-center gap-2 mb-2"><span className="font-mono font-bold text-slate-700 bg-slate-50 px-2 py-0.5 rounded text-sm">{exp.expediente}</span><span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${PRIORIDADES[exp.prioridad]?.color}`}>{PRIORIDADES[exp.prioridad]?.label}</span><span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ESTADOS[exp.estado]?.color}`}>{ESTADOS[exp.estado]?.label}</span></div>
+                                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${PRIORIDADES[exp.prioridad]?.color}`}>{PRIORIDADES[exp.prioridad]?.label}</span>
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${ESTADOS[exp.estado]?.color}`}>{ESTADOS[exp.estado]?.label}</span>
+                                                {(exp.estado === 'suspension') && <span className="text-xs text-orange-600 font-bold bg-orange-50 px-2 py-0.5 rounded">Desde: {exp.fechaSuspension}</span>}
+                                                {(exp.estado === 'baja') && <span className="text-xs text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded">Baja: {exp.fechaBaja}</span>}
+                                            </div>
                                             {(exp.serviceName) && <div className="mb-2 text-xs text-turquoise-700 bg-turquoise-50 px-2 py-1 rounded inline-block font-semibold">{exp.serviceName} &rsaquo; {exp.specialtyName}</div>}
                                             <div className="text-sm space-y-1"><div className="flex gap-2"><span className="font-bold text-xs text-slate-400 w-16">Diag:</span>{exp.diagnostico}</div><div className="flex gap-2"><span className="font-bold text-xs text-slate-400 w-16">Proc:</span>{exp.procedimiento}</div></div>
                                         </div>
@@ -543,6 +571,7 @@
                         </div>
                     </div>
 
+                    {/* MODAL CREAR/EDITAR PACIENTE */}
                     <Modal isOpen={showForm} onClose={closePatientForm} title={editingPatientId ? "Editar Información del Paciente" : "Nuevo Ingreso Hospitalario"} maxWidth="max-w-2xl">
                         <p className="text-xs text-slate-400 mb-6 flex items-center gap-1"><span className="text-red-500 font-bold">*</span> Indica campo obligatorio</p>
                         <form onSubmit={handleSubmitPatient} className="space-y-4">
@@ -639,7 +668,7 @@
             const handleLogout = async () => { if(auth) await signOut(auth); localStorage.removeItem('leq_role'); setRole(null); setView('dashboard'); setPatients([]); };
             const handleAddPatient = async (d) => { if(db) await addDoc(collection(db,'leq_patients'), {...d, createdAt:serverTimestamp()}); };
             const handleUpdatePatient = async (id, data) => { if(db) await updateDoc(doc(db, 'leq_patients', id), data); };
-            const handleAddExpediente = async (pid, pname, d) => { if(db) await addDoc(collection(db,'leq_expedientes'), {...d, patientId:pid, patientName:pname, estado:'pendiente', createdAt:serverTimestamp()}); };
+            const handleAddExpediente = async (pid, pname, d) => { if(db) await addDoc(collection(db,'leq_expedientes'), {...d, patientId:pid, patientName:pname, estado:'activo', createdAt:serverTimestamp()}); };
             const handleUpdateExpediente = async (id, data) => { if(db) await updateDoc(doc(db, 'leq_expedientes', id), data); };
             const handleStatus = async (id,s) => { if(db) await updateDoc(doc(db,'leq_expedientes',id),{estado:s}); };
             const handleDeleteExp = async (id) => { if(confirm('¿Eliminar expediente clínico?')) await deleteDoc(doc(db,'leq_expedientes',id)); };
