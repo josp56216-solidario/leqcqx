@@ -46,7 +46,7 @@
         .btn-hover-effect:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
         .btn-hover-effect:active { transform: translateY(0) scale(0.95); }
         
-        /* Animaciones personalizadas para las tarjetas de reporte */
+        /* Animaciones personalizadas */
         .report-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .report-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
         
@@ -110,7 +110,7 @@
             FileText: (p) => <Icon {...p} path={<><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></>} />,
             ArrowLeft: (p) => <Icon {...p} path={<><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></>} />,
             FolderPlus: (p) => <Icon {...p} path={<><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></>} />,
-            Settings: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0 1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></>} />,
+            Settings: (p) => <Icon {...p} path={<><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0 2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0 1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></>} />,
             ArrowRight: (p) => <Icon {...p} path={<><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></>} />,
             Plus: (p) => <Icon {...p} path={<><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></>} />,
             Minus: (p) => <Icon {...p} path={<line x1="5" y1="12" x2="19" y2="12"></line>} />,
@@ -389,7 +389,7 @@
                 const userKey = username.trim().toLowerCase();
                 
                 if (userKey === 'admin' && password === 'admin123') { 
-                    proceedLogin('admin'); 
+                    proceedLogin('admin', userKey); 
                     return; 
                 }
                 
@@ -398,7 +398,7 @@
                     const querySnapshot = await getDocs(q);
                     if (!querySnapshot.empty) {
                         const userData = querySnapshot.docs[0].data();
-                        if (userData.password === password) proceedLogin(userData.role);
+                        if (userData.password === password) proceedLogin(userData.role, userData.nombre || userData.username);
                         else { setError("Contraseña incorrecta."); setLoading(false); }
                     } else { setError("Usuario no encontrado."); setLoading(false); }
                 } catch (err) { 
@@ -407,8 +407,8 @@
                 }
             };
             
-            const proceedLogin = async (role) => {
-                 onLogin(role);
+            const proceedLogin = async (role, name) => {
+                 onLogin(role, name);
             };
             
             return (
@@ -694,17 +694,78 @@
             );
         };
 
-        const AdminDashboardBlock = ({ expedientes }) => {
-            const stats = useMemo(() => ({
-                total: expedientes.length,
-                alta: expedientes.filter(e => e.prioridad === 'P1').length,
-                prog: expedientes.filter(e => e.fechaProg).length,
-                op: expedientes.filter(e => e.fechaRealizacion).length
-            }), [expedientes]);
-            const StatCard = ({ title, val, col, icon:Icon }) => <div className={`p-1 rounded-3xl bg-gradient-to-br ${col} shadow-sm btn-hover-effect`}><div className="bg-white h-full rounded-[20px] p-6 relative overflow-hidden"><div className="absolute -right-2 -top-2 opacity-5 scale-150"><Icon size={100}/></div><div className="flex items-center gap-3 mb-3"><div className={`p-2 rounded-xl bg-gradient-to-br ${col} text-white`}><Icon size={20}/></div><span className="text-xs font-bold text-slate-400 uppercase">{title}</span></div><div className="text-4xl font-bold text-slate-800 brand-font">{val}</div></div></div>;
+        const AdminDashboardBlock = ({ role, userName, setView }) => {
+            const [time, setTime] = useState(new Date());
+            const [quote, setQuote] = useState('');
+
+            const quotes = [
+                "Donde quiera que se ame el arte de la medicina, se ama también a la humanidad. - Hipócrates",
+                "La salud es el regalo más valioso. Cuídalo y ayuda a otros a recuperarlo.",
+                "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
+                "La única forma de hacer un gran trabajo es amar lo que haces. - Steve Jobs",
+                "Curar a veces, aliviar a menudo, consolar siempre.",
+                "Tu dedicación marca la diferencia en la vida de cada paciente.",
+                "La disciplina es el puente entre metas y logros."
+            ];
+
+            useEffect(() => {
+                const timer = setInterval(() => setTime(new Date()), 1000);
+                setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+                return () => clearInterval(timer);
+            }, []);
+
+            const formatTime = (date) => {
+                return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            };
+
+            const formatDate = (date) => {
+                return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            };
+
+            const navCards = [
+                { id: 'reports', label: 'Reportes y Estadísticas', icon: Icons.List, color: 'bg-amber-500', role: 'all', desc: 'Ver indicadores y listas de espera' },
+                { id: 'pacientes', label: 'Gestión de Pacientes', icon: Icons.Users, color: 'bg-turquoise-500', role: 'all', desc: 'Ingreso y control de expedientes' },
+                { id: 'config', label: 'Configuración Clínica', icon: Icons.Settings, color: 'bg-slate-600', role: 'admin', desc: 'Servicios, Médicos e Interconsultas' },
+                { id: 'usuarios', label: 'Gestión de Usuarios', icon: Icons.UserCog, color: 'bg-purple-600', role: 'admin', desc: 'Administrar accesos al sistema' }
+            ];
+
             return (
-                <div className="space-y-6 animate-in w-full max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"><StatCard title="Casos Totales" val={stats.total} col="from-slate-700 to-slate-900" icon={Icons.ClipboardList} /><StatCard title="Urgencias Qx" val={stats.alta} col="from-red-500 to-red-600" icon={Icons.AlertCircle} /><StatCard title="Programados" val={stats.prog} col="from-blue-500 to-blue-600" icon={Icons.Clock} /><StatCard title="Operados" val={stats.op} col="from-clinical-500 to-clinical-600" icon={Icons.CheckCircle} /></div>
+                <div className="w-full max-w-6xl mx-auto space-y-8 animate-in">
+                    {/* Header Welcome */}
+                    <div className="bg-gradient-to-r from-turquoise-600 to-clinical-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+                        <div className="relative z-10">
+                            <h1 className="text-3xl font-bold brand-font mb-2">¡Hola, {userName || 'Usuario'}!</h1>
+                            <p className="opacity-90 text-sm font-medium uppercase tracking-wider">{role === 'admin' ? 'Administrador del Sistema' : 'Digitador Clínico'}</p>
+                        </div>
+                        <div className="absolute right-0 top-0 h-full w-1/2 bg-white/10 skew-x-12 transform origin-bottom-right"></div>
+                    </div>
+
+                    {/* Clock & Quote */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 flex flex-col justify-center items-center text-center">
+                            <div className="text-5xl font-mono font-bold text-slate-700 tracking-widest mb-2">{formatTime(time)}</div>
+                            <div className="text-sm text-slate-400 font-medium uppercase">{formatDate(time)}</div>
+                        </div>
+                        <div className="md:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-3xl shadow-soft text-white flex items-center relative overflow-hidden">
+                            <div className="absolute top-4 left-4 text-6xl opacity-10 font-serif">"</div>
+                            <p className="text-lg font-light italic relative z-10 pl-6 border-l-4 border-turquoise-400">{quote}</p>
+                        </div>
+                    </div>
+
+                    {/* Navigation Cards */}
+                    <h3 className="text-xl font-bold text-slate-700 brand-font mt-8">Accesos Directos</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {navCards.filter(c => c.role === 'all' || c.role === role).map(card => (
+                            <button key={card.id} onClick={() => setView(card.id)} className="group relative bg-white p-6 rounded-3xl shadow-soft border border-slate-100 hover:shadow-xl transition-all duration-300 text-left hover:-translate-y-1 overflow-hidden">
+                                <div className={`absolute top-0 right-0 w-24 h-24 ${card.color} opacity-10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`}></div>
+                                <div className={`w-12 h-12 rounded-2xl ${card.color} flex items-center justify-center text-white mb-4 shadow-md group-hover:scale-110 transition-transform`}>
+                                    <card.icon size={24} />
+                                </div>
+                                <h4 className="font-bold text-lg text-slate-800 mb-1 group-hover:text-turquoise-600 transition-colors">{card.label}</h4>
+                                <p className="text-xs text-slate-400">{card.desc}</p>
+                            </button>
+                        ))}
+                    </div>
                 </div>
             );
         };
@@ -770,21 +831,10 @@
                     headers = ["ID Paciente (DNI)", "Nombre Paciente", "Fecha Nacimiento", "Edad", "Sexo", "Domicilio", "Telefono", "Servicio", "Diagnostico", "Intervencion", "Medico", "Estado"].join(sep) + "\n";
                     rows = data.map(e => {
                         const p = patientMap[e.patientId] || {}; 
-                        
-                        return [
-                            p.dni || '',
-                            e.patientName || '',
-                            p.fechaNacimiento || '',
-                            p.edad || '',
-                            p.sexo || '',
-                            p.domicilio || '',
-                            p.telefonos || '',
-                            e.serviceName || '',
-                            e.diagnostico || '',
-                            e.procedimiento || '',
-                            e.doctorName || '',
-                            e.estado || ''
-                        ].map(esc).join(sep);
+                        const dni = p.dni || 'N/A';
+                        const edad = p.edad || 'N/A';
+                        const dias = calculateDaysWaiting(e.fechaSolicitud);
+                        return [dni, e.patientName, p.fechaNacimiento || '', p.edad || '', p.sexo || '', p.domicilio || '', p.telefonos || '', e.serviceName, e.diagnostico, e.procedimiento, e.doctorName, e.estado].map(esc).join(sep);
                     }).join("\n");
                 }
 
@@ -874,7 +924,7 @@
         };
 
         const App = () => {
-            const [role, setRole] = useState(null); const [view, setView] = useState('dashboard');
+            const [role, setRole] = useState(null); const [userName, setUserName] = useState(null); const [view, setView] = useState('dashboard');
             const [patients, setPatients] = useState([]); const [expedientes, setExpedientes] = useState([]); const [systemUsers, setSystemUsers] = useState([]);
             const [services, setServices] = useState([]); const [specialties, setSpecialties] = useState([]); const [doctors, setDoctors] = useState([]); const [interconsultas, setInterconsultas] = useState([]);
             const [sidebarCollapsed, setSidebarCollapsed] = useState(false); const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -890,7 +940,8 @@
                 };
                 initAuth();
                 const savedRole = localStorage.getItem('leq_role');
-                if (savedRole) { setRole(savedRole); }
+                const savedName = localStorage.getItem('leq_username');
+                if (savedRole) { setRole(savedRole); setUserName(savedName); }
             }, []);
 
             useEffect(() => {
@@ -914,7 +965,8 @@
                 onSnapshot(collection(db, 'leq_interconsultas'), (s) => setInterconsultas(s.docs.map(d=>({id:d.id, ...d.data()}))), handleError('interconsultas'));
             };
 
-            const handleLogout = async () => { if(auth) await signOut(auth); localStorage.removeItem('leq_role'); setRole(null); setView('dashboard'); setPatients([]); };
+            const handleLogout = async () => { if(auth) await signOut(auth); localStorage.removeItem('leq_role'); localStorage.removeItem('leq_username'); setRole(null); setUserName(null); setView('dashboard'); setPatients([]); };
+            const handleLoginSuccess = (newRole, newName) => { setRole(newRole); setUserName(newName); localStorage.setItem('leq_role', newRole); localStorage.setItem('leq_username', newName); setupListeners(); };
             
             // --- ACTION BUTTONS WITH ROOT COLLECTIONS ---
             const handleAddPatient = async (d) => { if(db) await addDoc(collection(db, 'leq_patients'), {...d, createdAt:serverTimestamp()}); };
@@ -938,7 +990,7 @@
             const handleAddInterconsulta = async (name) => { if(db) await addDoc(collection(db, 'leq_interconsultas'), { name }); };
             const handleDeleteInterconsulta = async (id) => { if(confirm('¿Borrar interconsulta?')) await deleteDoc(doc(db, 'leq_interconsultas',id)); };
 
-            if (!role) return <LoginBlock onLogin={(r)=>{setRole(r); setupListeners();}} />;
+            if (!role) return <LoginBlock onLogin={handleLoginSuccess} />;
 
             const NavItem = ({ id, label, icon: Icon }) => (
                 <button onClick={() => { setView(id); setMobileMenuOpen(false); }} className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all font-bold group relative overflow-hidden btn-hover-effect ${view === id ? 'bg-gradient-to-r from-turquoise-500 to-turquoise-600 text-white shadow-lg' : 'hover:bg-turquoise-800/50 text-turquoise-300'} ${sidebarCollapsed ? 'justify-center' : ''}`} title={label}><Icon size={20} className={view === id ? 'text-white' : 'text-turquoise-400 group-hover:text-white'} /><span className={`whitespace-nowrap transition-opacity duration-300 ${sidebarCollapsed ? 'hidden opacity-0 w-0' : 'block opacity-100'}`}>{label}</span></button>
@@ -971,7 +1023,7 @@
                     <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#f0fdfa] relative transition-all duration-300">
                         <div className="md:hidden bg-white/80 backdrop-blur-md p-4 shadow-sm flex justify-between items-center z-20"><button onClick={() => setMobileMenuOpen(true)} className="text-slate-600 p-1 btn-hover-effect"><Icons.Menu size={24}/></button><div className="font-bold text-slate-800 flex items-center gap-2 brand-font"><Icons.Activity size={18} className="text-turquoise-600"/> LEQ Móvil</div><div className="w-8"></div></div>
                         <div className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth relative z-10">
-                            {view === 'dashboard' && <AdminDashboardBlock expedientes={expedientes} />}
+                            {view === 'dashboard' && <AdminDashboardBlock role={role} userName={userName} setView={setView} />}
                             {view === 'reports' && <ReportsBlock expedientes={expedientes} patients={patients} navigateToPatients={() => setView('pacientes')} />}
                             {view === 'pacientes' && <PatientManagementBlock patients={patients} expedientes={expedientes} services={services} specialties={specialties} doctors={doctors} interconsultas={interconsultas} onAddPatient={handleAddPatient} onUpdatePatient={handleUpdatePatient} onAddExpediente={handleAddExpediente} onUpdateExpediente={handleUpdateExpediente} onStatusChange={handleStatus} onDeletePatient={handleDeletePatient} onDeleteExpediente={handleDeleteExp} userRole={role} />}
                             {view === 'config' && role === 'admin' && <ConfigBlock services={services} specialties={specialties} doctors={doctors} interconsultas={interconsultas} onAddService={handleAddService} onDeleteService={handleDeleteService} onAddSpecialty={handleAddSpecialty} onDeleteSpecialty={handleDeleteSpecialty} onAddDoctor={handleAddDoctor} onDeleteDoctor={handleDeleteDoctor} onAddInterconsulta={handleAddInterconsulta} onDeleteInterconsulta={handleDeleteInterconsulta} />}
