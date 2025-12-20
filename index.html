@@ -107,7 +107,7 @@
         // ==================================================================================
         // CONFIGURACIÓN API KEY - INTELIGENCIA ARTIFICIAL
         // ==================================================================================
-        const GEMINI_API_KEY = "AIzaSyBosxJqxUT9yCUXCq2z4CKfyXHN0uwjb5E"; 
+        const apiKey = ""; // La clave se inyecta por el entorno de ejecución
         // ==================================================================================
 
         // --- ICONOS ---
@@ -144,7 +144,8 @@
             Eye: (p) => <Icon {...p} path={<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></>} />,
             Send: (p) => <Icon {...p} path={<><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></>} />,
             Bot: (p) => <Icon {...p} path={<><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></>} />,
-            Folder: (p) => <Icon {...p} path={<><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></>} />
+            Folder: (p) => <Icon {...p} path={<><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></>} />,
+            Hospital: (p) => <Icon {...p} path={<><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><line x1="12" y1="9" x2="12" y2="17"></line><line x1="8" y1="13" x2="16" y2="13"></line></>} />
         };
 
         // --- FIREBASE CONFIG (Usuario Especifico: leqihsscqx) ---
@@ -505,6 +506,84 @@
                 </div>
             );
         };
+        
+        // --- THIS MUST BE DEFINED BEFORE ReportsBlock and App ---
+        const AdminDashboardBlock = ({ role, userName, setView }) => {
+            const [time, setTime] = useState(new Date());
+            const [quote, setQuote] = useState('');
+
+            const quotes = [
+                "Donde quiera que se ame el arte de la medicina, se ama también a la humanidad. - Hipócrates",
+                "La salud es el regalo más valioso. Cuídalo y ayuda a otros a recuperarlo.",
+                "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
+                "La única forma de hacer un gran trabajo es amar lo que haces. - Steve Jobs",
+                "Curar a veces, aliviar a menudo, consolar siempre.",
+                "Tu dedicación marca la diferencia en la vida de cada paciente.",
+                "La disciplina es el puente entre metas y logros."
+            ];
+
+            useEffect(() => {
+                const timer = setInterval(() => setTime(new Date()), 1000);
+                setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+                return () => clearInterval(timer);
+            }, []);
+
+            const formatTime = (date) => {
+                return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            };
+
+            const formatDate = (date) => {
+                return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            };
+
+            const navCards = [
+                { id: 'reports', label: 'Reportes y Estadísticas', icon: Icons.List, color: 'bg-amber-500', role: 'all', desc: 'Ver indicadores y listas de espera' },
+                { id: 'pacientes', label: 'Gestión de Pacientes', icon: Icons.Users, color: 'bg-turquoise-500', role: 'all', desc: 'Ingreso y control de expedientes' },
+                { id: 'config', label: 'Configuración Clínica', icon: Icons.Settings, color: 'bg-slate-600', role: 'admin', desc: 'Servicios, Médicos e Interconsultas' },
+                { id: 'usuarios', label: 'Gestión de Usuarios', icon: Icons.UserCog, color: 'bg-purple-600', role: 'admin', desc: 'Administrar accesos al sistema' },
+                { id: 'mora0', label: 'Mora 0', icon: Icons.Hospital, color: 'bg-indigo-600', role: 'admin', desc: 'Control de programa Mora 0' }
+            ];
+
+            return (
+                <div className="w-full max-w-6xl mx-auto space-y-8 animate-in">
+                    {/* Header Welcome */}
+                    <div className="bg-gradient-to-r from-turquoise-600 to-clinical-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+                        <div className="relative z-10">
+                            <h1 className="text-3xl font-bold brand-font mb-2">¡Hola, {userName || 'Usuario'}!</h1>
+                            <p className="opacity-90 text-sm font-medium uppercase tracking-wider">{role === 'superadmin' ? 'Super Administrador' : role === 'admin' ? 'Administrador' : 'Digitador Clínico'}</p>
+                        </div>
+                        <div className="absolute right-0 top-0 h-full w-1/2 bg-white/10 skew-x-12 transform origin-bottom-right"></div>
+                    </div>
+
+                    {/* Clock & Quote */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 flex flex-col justify-center items-center text-center">
+                            <div className="text-5xl font-mono font-bold text-slate-700 tracking-widest mb-2">{formatTime(time)}</div>
+                            <div className="text-sm text-slate-400 font-medium uppercase">{formatDate(time)}</div>
+                        </div>
+                        <div className="md:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-3xl shadow-soft text-white flex items-center relative overflow-hidden">
+                            <div className="absolute top-4 left-4 text-6xl opacity-10 font-serif">"</div>
+                            <p className="text-lg font-light italic relative z-10 pl-6 border-l-4 border-turquoise-400">{quote}</p>
+                        </div>
+                    </div>
+
+                    {/* Navigation Cards */}
+                    <h3 className="text-xl font-bold text-slate-700 brand-font mt-8">Accesos Directos</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {navCards.filter(c => c.role === 'all' || (role === 'superadmin') || (role === 'admin' && (c.role === 'admin' || c.role === 'all'))).map(card => (
+                            <button key={card.id} onClick={() => setView(card.id)} className="group relative bg-white p-6 rounded-3xl shadow-soft border border-slate-100 hover:shadow-xl transition-all duration-300 text-left hover:-translate-y-1 overflow-hidden">
+                                <div className={`absolute top-0 right-0 w-24 h-24 ${card.color} opacity-10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`}></div>
+                                <div className={`w-12 h-12 rounded-2xl ${card.color} flex items-center justify-center text-white mb-4 shadow-md group-hover:scale-110 transition-transform`}>
+                                    <card.icon size={24} />
+                                </div>
+                                <h4 className="font-bold text-lg text-slate-800 mb-1 group-hover:text-turquoise-600 transition-colors">{card.label}</h4>
+                                <p className="text-xs text-slate-400">{card.desc}</p>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
 
         const UserManagementBlock = ({ users, onAddUser, onUpdateUser, onDeleteUser, currentUserRole }) => {
             const [formData, setFormData] = useState({ username: '', password: '', role: 'digitador', nombre: '', departamento: 'Departamento de IT' });
@@ -628,6 +707,395 @@
             );
         };
 
+        const ReportsBlock = ({ expedientes, patients, doctors, navigateToPatients }) => {
+            const [filter, setFilter] = useState('');
+            const [subView, setSubView] = useState(null); // 'waiting_list', 'all_exps', 'active', 'suspended', 'baja', 'doctors_dashboard', 'single_doctor_view'
+            const [selectedDoctor, setSelectedDoctor] = useState(null);
+            const [doctorTab, setDoctorTab] = useState('activo'); // 'activo', 'suspension', 'baja'
+            const [viewingExp, setViewingExp] = useState(null);
+            const [doctorAiQuery, setDoctorAiQuery] = useState('');
+            const [filteredDoctorExps, setFilteredDoctorExps] = useState(null); // For AI filtering results
+            const [isAiLoading, setIsAiLoading] = useState(false);
+
+            const stats = useMemo(() => ({
+                totalPatients: patients.length,
+                totalExps: expedientes.length,
+                active: expedientes.filter(e => e.estado === 'activo').length,
+                suspended: expedientes.filter(e => e.estado === 'suspension').length,
+                baja: expedientes.filter(e => e.estado === 'baja').length,
+                totalDoctors: doctors.length
+            }), [expedientes, patients, doctors]);
+
+            // General Lists logic
+            const currentList = useMemo(() => {
+                let d = [];
+                if (subView === 'waiting_list') {
+                    d = expedientes.filter(e => e.estado === 'activo').sort((a,b) => {
+                        const pA = a.prioridad || 'P3'; const pB = b.prioridad || 'P3';
+                        if (pA < pB) return -1; if (pA > pB) return 1;
+                        return new Date(a.fechaSolicitud) - new Date(b.fechaSolicitud);
+                    });
+                } else if (subView === 'all_exps') d = expedientes;
+                else if (subView === 'active') d = expedientes.filter(e => e.estado === 'activo');
+                else if (subView === 'suspended') d = expedientes.filter(e => e.estado === 'suspension');
+                else if (subView === 'baja') d = expedientes.filter(e => e.estado === 'baja');
+                
+                return d.filter(e => e.patientName?.toLowerCase().includes(filter.toLowerCase()) || e.diagnostico?.toLowerCase().includes(filter.toLowerCase()));
+            }, [expedientes, subView, filter]);
+
+            // Doctor Folder Logic
+            const currentDoctorExps = useMemo(() => {
+                if (!selectedDoctor) return [];
+                let base = expedientes.filter(e => e.doctorId === selectedDoctor.id && e.estado === doctorTab);
+                
+                // AI Filter Application
+                if (filteredDoctorExps) {
+                    base = base.filter(e => filteredDoctorExps.includes(e.id));
+                }
+
+                return base;
+            }, [expedientes, selectedDoctor, doctorTab, filteredDoctorExps]);
+
+            const handleDoctorAiSearch = async () => {
+                // Verificar conexión a internet primero
+                if (!navigator.onLine) {
+                    alert("No hay conexión a internet para usar la IA. Por favor verifica tu red.");
+                    return;
+                }
+
+                if (!doctorAiQuery.trim()) { setFilteredDoctorExps(null); return; }
+                
+                // La clave es inyectada por el entorno, no la pedimos manualmente
+                const apiKey = ""; 
+
+                setIsAiLoading(true);
+                try {
+                    // Create minimal context for AI
+                    const baseContext = expedientes.filter(e => e.doctorId === selectedDoctor.id && e.estado === doctorTab).map(e => ({
+                        id: e.id,
+                        diagnostico: e.diagnostico,
+                        procedimiento: e.procedimiento,
+                        // IGNORAMOS DATOS DEMOGRÁFICOS PARA CUMPLIR REQUERIMIENTO ESTRICTO
+                    }));
+
+                    const prompt = `
+                    Eres un asistente médico administrativo experto. Tu tarea es filtrar una lista de expedientes quirúrgicos.
+                    
+                    BASE DE DATOS (JSON):
+                    ${JSON.stringify(baseContext)}
+
+                    CONSULTA DEL USUARIO: "${doctorAiQuery}"
+
+                    INSTRUCCIONES DE RAZONAMIENTO:
+                    1. Analiza EXCLUSIVAMENTE los campos 'diagnostico' y 'procedimiento' (Intervenciones) buscando coincidencias semánticas.
+                    2. Aplica conocimientos médicos para sinónimos:
+                       - Si buscan "Piedras" o "Cálculos" -> Busca "Litiasis", "Colelitiasis", "Nefrolitiasis".
+                       - Si buscan "Vesícula" -> Busca "Colecistectomía", "Colelitiasis".
+                       - Si buscan "Hernia" -> Busca "Hernioplastia", "Herniorrafia".
+                       - Si buscan "Apéndice" -> Busca "Apendicectomía", "Apendicitis".
+                    3. IGNORA cualquier criterio relacionado con edad, sexo, fecha o domicilio. SOLO diagnósticos e intervenciones.
+                    
+                    SALIDA REQUERIDA:
+                    - Devuelve ÚNICAMENTE un array JSON válido de strings con los IDs de los expedientes que cumplen el criterio.
+                    - Formato exacto: ["id_1", "id_2"]
+                    - Si no hay coincidencias, devuelve: []
+                    - NO incluyas texto, ni explicaciones, ni bloques de código markdown (\`\`\`). Solo el array raw.
+                    `;
+
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+
+                    const data = await response.json();
+                    
+                    // Error Handling for API issues
+                    if (data.error) {
+                        throw new Error(data.error.message || "Error en la API de Google");
+                    }
+
+                    let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
+                    if (!rawText) {
+                        setFilteredDoctorExps([]); // No results or empty response
+                        return;
+                    }
+
+                    // Robust cleanup
+                    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                    
+                    // Try to parse, looking for array structure
+                    let ids = [];
+                    try {
+                        ids = JSON.parse(rawText);
+                    } catch (e) {
+                        // Fallback: Try to extract array if AI added extra text
+                        const match = rawText.match(/\[.*\]/s);
+                        if (match) {
+                            ids = JSON.parse(match[0]);
+                        } else {
+                            console.warn("AI output invalid format:", rawText);
+                            ids = [];
+                        }
+                    }
+                    
+                    if (Array.isArray(ids)) {
+                        setFilteredDoctorExps(ids);
+                    } else {
+                        console.error("AI response not an array");
+                        setFilteredDoctorExps([]);
+                    }
+
+                } catch (err) {
+                    console.error("AI Filter Error", err);
+                    alert(`Error al conectar con la IA. Verifique su conexión.`);
+                    setFilteredDoctorExps(null);
+                } finally {
+                    setIsAiLoading(false);
+                }
+            };
+
+            const exportCSV = (data, filename) => {
+                if(!data || data.length === 0) { alert("No hay datos para exportar"); return; }
+                
+                const sep = ";";
+                const isPatientList = data[0].hasOwnProperty('nombres') && !data[0].hasOwnProperty('serviceName');
+                
+                let headers = "";
+                let rows = "";
+
+                const esc = (text) => {
+                    if (text === null || text === undefined) return '';
+                    return `"${String(text).replace(/"/g, '""')}"`;
+                };
+
+                if (isPatientList) {
+                    headers = ["Nombre", "Apellido", "DNI", "Afiliacion", "Edad", "Sexo", "Patrono", "Telefono", "Domicilio", "Total Exps", "Activos", "Suspendidos", "Baja"].join(sep) + "\n";
+                    rows = data.map(p => {
+                        const patientExps = expedientes.filter(e => e.patientId === p.id);
+                        const total = patientExps.length;
+                        const activos = patientExps.filter(e => e.estado === 'activo').length;
+                        const susp = patientExps.filter(e => e.estado === 'suspension').length;
+                        const baja = patientExps.filter(e => e.estado === 'baja').length;
+
+                        return [p.nombres, p.apellidos, p.dni, p.nAfiliacion, p.edad, p.sexo, p.patrono, p.telefonos, p.domicilio, total, activos, susp, baja].map(esc).join(sep)
+                    }).join("\n");
+                } else {
+                    const patientMap = patients.reduce((acc, p) => { acc[p.id] = p; return acc; }, {});
+                    
+                    // Dynamic Headers based on subView
+                    if (subView === 'suspended') {
+                         headers = ["ID Paciente", "Nombre", "Servicio", "Especialidad", "Medico", "Diagnostico", "Intervencion", "Estado", "Fecha Suspension", "Dias Suspendido", "Causa"].join(sep) + "\n";
+                    } else if (subView === 'baja') {
+                         headers = ["ID Paciente", "Nombre", "Servicio", "Especialidad", "Medico", "Diagnostico", "Intervencion", "Estado", "Fecha Baja", "Dias Baja", "Causa"].join(sep) + "\n";
+                    } else {
+                         headers = ["ID Paciente", "Nombre", "Servicio", "Especialidad", "Medico", "Diagnostico", "Intervencion", "Estado", "Fecha Solicitud", "Dias Espera"].join(sep) + "\n";
+                    }
+
+                    rows = data.map(e => {
+                        const p = patientMap[e.patientId] || {}; 
+                        const dni = p.dni || 'N/A';
+                        
+                        let dateVal = e.fechaSolicitud;
+                        let daysVal = calculateDaysWaiting(e.fechaSolicitud);
+                        let causa = "";
+
+                        if (subView === 'suspended') {
+                            dateVal = e.fechaSuspension;
+                            daysVal = e.fechaSuspension ? calculateDaysWaiting(e.fechaSuspension) : 0;
+                            causa = e.causaSuspension;
+                        } else if (subView === 'baja') {
+                            dateVal = e.fechaBaja;
+                            daysVal = e.fechaBaja ? calculateDaysWaiting(e.fechaBaja) : 0;
+                            causa = e.causaBaja;
+                        }
+
+                        const common = [dni, e.patientName, e.serviceName, e.specialtyName, e.doctorName, e.diagnostico, e.procedimiento, e.estado, dateVal, daysVal];
+                        if(subView === 'suspended' || subView === 'baja') common.push(causa);
+                        
+                        return common.map(esc).join(sep);
+                    }).join("\n");
+                }
+
+                const blob = new Blob(["\uFEFF" + headers + rows], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+            };
+
+            const Card = ({ title, count, icon: Icon, color, onClick, onDownload, isPatient }) => (
+                <div onClick={onClick} className={`relative p-6 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer group overflow-hidden ${color} report-card`}>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{title}</p>
+                            <h3 className="text-3xl font-bold text-slate-800 brand-font"><AnimatedCounter value={count} /></h3>
+                        </div>
+                        <div className={`p-4 rounded-xl bg-gradient-to-br ${color.replace('border-', 'from-').replace('400', '100')} to-white text-slate-600 shadow-sm`}>
+                            <Icon size={28} />
+                        </div>
+                    </div>
+                    <div className="mt-6 flex gap-2 items-center">
+                        {onDownload && <button onClick={(e) => { e.stopPropagation(); onDownload(); }} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-200 text-slate-500 transition-colors shadow-sm" title="Descargar CSV">
+                            <Icons.Download size={18} />
+                        </button>}
+                        <div className="h-px bg-slate-100 flex-1 mx-2"></div>
+                        <span className="text-[10px] font-bold text-slate-400 self-center flex items-center gap-1 group-hover:text-turquoise-600 transition-colors">Ver Detalles <Icons.ArrowRight size={12}/></span>
+                    </div>
+                </div>
+            );
+
+            if (subView === 'doctors_dashboard') {
+                return (
+                    <div className="glass-panel rounded-3xl shadow-soft flex flex-col h-full animate-in overflow-hidden border-0 bg-white">
+                        <div className="p-6 border-b border-slate-100 bg-white/50 backdrop-blur-md flex items-center gap-4">
+                            <button onClick={() => setSubView(null)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors btn-hover-effect"><Icons.ArrowLeft size={20}/></button>
+                            <div><h3 className="font-bold text-xl text-slate-800 brand-font">Carpetas Médicas</h3><p className="text-xs font-semibold text-turquoise-600">{doctors.length} Médicos Registrados</p></div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 bg-slate-50">
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                {doctors.map(doc => (
+                                    <div key={doc.id} onClick={() => { setSelectedDoctor(doc); setSubView('single_doctor_view'); setDoctorTab('activo'); setFilteredDoctorExps(null); setDoctorAiQuery(''); }} className="bg-white p-4 rounded-xl border border-slate-200 hover:border-turquoise-400 hover:shadow-md cursor-pointer flex flex-col items-center text-center gap-3 transition-all group">
+                                        <div className="bg-amber-100 p-3 rounded-full text-amber-600 group-hover:scale-110 transition-transform"><Icons.Folder size={32}/></div>
+                                        <div><h4 className="font-bold text-sm text-slate-700">{doc.name}</h4><p className="text-[10px] text-slate-400 mt-1">{expedientes.filter(e => e.doctorId === doc.id).length} Casos</p></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (subView === 'single_doctor_view' && selectedDoctor) {
+                return (
+                    <div className="glass-panel rounded-3xl shadow-soft flex flex-col h-full animate-in overflow-hidden border-0 bg-white">
+                        <ExpedienteDetailModal exp={viewingExp} isOpen={!!viewingExp} onClose={() => setViewingExp(null)} />
+                        
+                        <div className="p-6 border-b border-slate-100 bg-white/50 backdrop-blur-md">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="flex items-center gap-4">
+                                    <button onClick={() => setSubView('doctors_dashboard')} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors btn-hover-effect"><Icons.ArrowLeft size={20}/></button>
+                                    <div><h3 className="font-bold text-xl text-slate-800 brand-font">{selectedDoctor.name}</h3><p className="text-xs font-semibold text-slate-400">Carpeta Digital Personal</p></div>
+                                </div>
+                                <button onClick={() => exportCSV(currentDoctorExps, `Reporte_${selectedDoctor.name.replace(/\s/g,'_')}_${doctorTab}.csv`)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-md btn-hover-effect"><Icons.Download size={16}/> Exportar Lista</button>
+                            </div>
+                            
+                            <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
+                                <div className="flex p-1 bg-slate-100 rounded-xl">
+                                    {['activo', 'suspension', 'baja'].map(tab => (
+                                        <button key={tab} onClick={() => { setDoctorTab(tab); setFilteredDoctorExps(null); }} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${doctorTab === tab ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>{tab}</button>
+                                    ))}
+                                </div>
+                                <div className="flex gap-2 w-full md:w-auto">
+                                    <input type="text" placeholder="IA: Diagnóstico, Intervención..." className="flex-1 p-2 border border-slate-200 rounded-lg text-sm w-full md:w-64" value={doctorAiQuery} onChange={e => setDoctorAiQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleDoctorAiSearch()} />
+                                    <button onClick={handleDoctorAiSearch} disabled={isAiLoading} className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg btn-hover-effect disabled:opacity-50">{isAiLoading ? <Icons.Clock size={20} className="animate-spin"/> : <Icons.Bot size={20}/>}</button>
+                                    {filteredDoctorExps && <button onClick={() => { setFilteredDoctorExps(null); setDoctorAiQuery(''); }} className="text-xs text-red-500 font-bold hover:underline">Borrar Filtro</button>}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-auto p-0">
+                            <table className="w-full text-left border-collapse min-w-[900px]">
+                                <thead className="bg-slate-50 sticky top-0 z-10"><tr className="text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200"><th className="px-6 py-3">Prioridad</th><th className="px-6 py-3">Paciente</th><th className="px-6 py-3">Diagnóstico</th><th className="px-6 py-3">Intervención</th><th className="px-6 py-3 text-right">Fecha Sol.</th></tr></thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {currentDoctorExps.map(e => (
+                                        <tr key={e.id} onClick={() => setViewingExp(e)} className="hover:bg-slate-50 transition-colors cursor-pointer group">
+                                            <td className="px-6 py-4"><span className={`px-2 py-1 rounded text-[10px] font-bold border uppercase ${PRIORIDADES[e.prioridad]?.color}`}>{PRIORIDADES[e.prioridad]?.label.split('.')[0]}</span></td>
+                                            <td className="px-6 py-4"><div className="font-bold text-slate-700 text-sm">{e.patientName}</div></td>
+                                            <td className="px-6 py-4 text-xs text-slate-600 max-w-xs truncate">{e.diagnostico || 'Sin diagnóstico'}</td>
+                                            <td className="px-6 py-4 text-xs text-slate-600 max-w-xs truncate">{e.procedimiento || '-'}</td>
+                                            <td className="px-6 py-4 text-right"><span className="font-mono text-xs text-slate-400">{e.fechaSolicitud}</span></td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            {currentDoctorExps.length === 0 && <div className="p-10 text-center text-slate-400 border-2 border-dashed border-slate-100 m-6 rounded-xl">La carpeta está vacía para esta categoría o filtro.</div>}
+                        </div>
+                    </div>
+                );
+            }
+
+            if (!subView) {
+                // DASHBOARD VIEW
+                return (
+                    <div className="space-y-8 animate-in w-full max-w-7xl mx-auto">
+                        <div className="flex flex-col gap-2 mb-4">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-800 brand-font">Panel de Reportes</h2>
+                                    <p className="text-sm text-slate-500">Visualice estadísticas generales y gestione carpetas médicas.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Standard Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <Card title="Lista de Espera Global" count={stats.active} icon={Icons.List} color="border-amber-400" onClick={() => setSubView('waiting_list')} />
+                            <Card title="Doctores" count={stats.totalDoctors} icon={Icons.Folder} color="border-indigo-400" onClick={() => setSubView('doctors_dashboard')} />
+                            <Card title="Pacientes Totales" count={stats.totalPatients} icon={Icons.Users} color="border-blue-400" onClick={navigateToPatients} onDownload={() => exportCSV(patients, 'LEQ_Pacientes.csv')} isPatient={true} />
+                            <Card title="Expedientes Totales" count={stats.totalExps} icon={Icons.FolderPlus} color="border-slate-400" onClick={() => setSubView('all_exps')} onDownload={() => exportCSV(expedientes, 'LEQ_TotalExpedientes.csv')} />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <Card title="Expedientes Activos" count={stats.active} icon={Icons.Clock} color="border-green-400" onClick={() => setSubView('active')} onDownload={() => exportCSV(expedientes.filter(e => e.estado === 'activo'), 'LEQ_Activos.csv')} />
+                            <Card title="Expedientes Suspendidos" count={stats.suspended} icon={Icons.AlertCircle} color="border-orange-400" onClick={() => setSubView('suspended')} onDownload={() => exportCSV(expedientes.filter(e => e.estado === 'suspension'), 'LEQ_Suspendidos.csv')} />
+                            <Card title="Expedientes de Baja" count={stats.baja} icon={Icons.X} color="border-red-400" onClick={() => setSubView('baja')} onDownload={() => exportCSV(expedientes.filter(e => e.estado === 'baja'), 'LEQ_Baja.csv')} />
+                        </div>
+
+                        <ExpedienteDetailModal exp={viewingExp} isOpen={!!viewingExp} onClose={() => setViewingExp(null)} />
+                    </div>
+                );
+            }
+
+            // TABLE VIEW (Fallback for existing views)
+            const viewTitles = { 'waiting_list': 'Lista de Espera Global', 'all_exps': 'Todos los Expedientes', 'active': 'Expedientes Activos', 'suspended': 'Expedientes Suspendidos', 'baja': 'Expedientes de Baja' };
+
+            return (
+                <div className="glass-panel rounded-3xl shadow-soft flex flex-col h-full animate-in overflow-hidden border-0 bg-white">
+                    <ExpedienteDetailModal exp={viewingExp} isOpen={!!viewingExp} onClose={() => setViewingExp(null)} />
+                    
+                    <div className="p-6 border-b border-slate-100 bg-white/50 backdrop-blur-md flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                            <button onClick={() => setSubView(null)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors btn-hover-effect"><Icons.ArrowLeft size={20}/></button>
+                            <div><h3 className="font-bold text-xl text-slate-800 brand-font">{viewTitles[subView]}</h3><p className="text-xs font-semibold text-turquoise-600">{currentList.length} Registros encontrados</p></div>
+                        </div>
+                        <div className="flex gap-3 items-center">
+                            <div className="relative w-64"><div className="absolute left-3 top-2.5 text-slate-400"><Icons.Search size={16}/></div><input type="text" placeholder="Filtrar por nombre..." className="w-full pl-10 pr-4 py-2.5 bg-slate-50 rounded-xl text-sm outline-none border border-transparent focus:border-turquoise-200 transition-all focus:shadow-sm" value={filter} onChange={e=>setFilter(e.target.value)} /></div>
+                            {subView !== 'waiting_list' && <button onClick={() => exportCSV(currentList, `LEQ_${subView}.csv`)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md btn-hover-effect"><Icons.Download size={16}/> Exportar Vista</button>}
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-auto p-0">
+                        <table className="w-full text-left border-collapse min-w-[900px]">
+                            <thead className="bg-slate-50 sticky top-0 z-10"><tr className="text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200"><th className="px-6 py-3">Prioridad</th><th className="px-6 py-3">Paciente / Servicio</th><th className="px-6 py-3">Diagnóstico</th><th className="px-6 py-3">Estado</th><th className="px-6 py-3 text-right">Tiempo</th></tr></thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {currentList.map(e => {
+                                    let timeLabel = "";
+                                    if (e.estado === 'suspension') timeLabel = `${calculateDaysWaiting(e.fechaSuspension)} d (Susp)`;
+                                    else if (e.estado === 'baja') timeLabel = `${calculateDaysWaiting(e.fechaBaja)} d (Baja)`;
+                                    else timeLabel = `${calculateDaysWaiting(e.fechaSolicitud)} d (Espera)`;
+
+                                    return (
+                                        <tr key={e.id} onClick={() => setViewingExp(e)} className={`hover:bg-slate-50 transition-colors cursor-pointer group ${getRowStyle(e.estado)}`}>
+                                            <td className="px-6 py-4"><span className={`px-2 py-1 rounded text-[10px] font-bold border uppercase ${PRIORIDADES[e.prioridad]?.color}`}>{PRIORIDADES[e.prioridad]?.label.split('.')[0]}</span></td>
+                                            <td className="px-6 py-4">
+                                                <div className="font-bold text-slate-700 text-sm">{e.patientName}</div>
+                                                <div className="text-xs text-slate-500">{e.serviceName || 'General'} - {e.specialtyName || 'Sin Esp.'}</div>
+                                                <div className="text-[10px] text-slate-400 italic">Dr. {e.doctorName || 'No asignado'}</div>
+                                            </td>
+                                            <td className="px-6 py-4 text-xs text-slate-600 max-w-xs truncate" title={e.diagnostico}>{e.diagnostico || 'Sin diagnóstico'}</td>
+                                            <td className="px-6 py-4"><span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${ESTADOS[e.estado]?.color}`}>{ESTADOS[e.estado]?.label}</span></td>
+                                            <td className="px-6 py-4 text-right"><div className="flex justify-end items-center gap-2 font-mono text-xs text-slate-400">{timeLabel} <div className="p-1 rounded-full hover:bg-turquoise-50 text-slate-300 hover:text-turquoise-500 transition-colors"><Icons.Eye size={16}/></div></div></td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        {currentList.length === 0 && <div className="p-10 text-center text-slate-400 border-2 border-dashed border-slate-100 m-6 rounded-xl">No hay registros que coincidan con su búsqueda.</div>}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- NEW: PATIENT MANAGEMENT BLOCK (Reconstructed) ---
         const PatientManagementBlock = ({ patients, expedientes, services, specialties, doctors, interconsultas = [], onAddPatient, onUpdatePatient, onAddExpediente, onUpdateExpediente, onStatusChange, onDeletePatient, onDeleteExpediente, userRole }) => {
             const [searchTerm, setSearchTerm] = useState('');
             const [showForm, setShowForm] = useState(false);
@@ -761,384 +1229,89 @@
             );
         };
 
-        const AdminDashboardBlock = ({ role, userName, setView }) => {
-            const [time, setTime] = useState(new Date());
-            const [quote, setQuote] = useState('');
+        const Mora0Block = ({ hospitals, onAdd, onDelete }) => {
+            const [newHospitalName, setNewHospitalName] = useState('');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [confirmData, setConfirmData] = useState(null);
 
-            const quotes = [
-                "Donde quiera que se ame el arte de la medicina, se ama también a la humanidad. - Hipócrates",
-                "La salud es el regalo más valioso. Cuídalo y ayuda a otros a recuperarlo.",
-                "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
-                "La única forma de hacer un gran trabajo es amar lo que haces. - Steve Jobs",
-                "Curar a veces, aliviar a menudo, consolar siempre.",
-                "Tu dedicación marca la diferencia en la vida de cada paciente.",
-                "La disciplina es el puente entre metas y logros."
-            ];
-
-            useEffect(() => {
-                const timer = setInterval(() => setTime(new Date()), 1000);
-                setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-                return () => clearInterval(timer);
-            }, []);
-
-            const formatTime = (date) => {
-                return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            };
-
-            const formatDate = (date) => {
-                return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            };
-
-            const navCards = [
-                { id: 'reports', label: 'Reportes y Estadísticas', icon: Icons.List, color: 'bg-amber-500', role: 'all', desc: 'Ver indicadores y listas de espera' },
-                { id: 'pacientes', label: 'Gestión de Pacientes', icon: Icons.Users, color: 'bg-turquoise-500', role: 'all', desc: 'Ingreso y control de expedientes' },
-                { id: 'config', label: 'Configuración Clínica', icon: Icons.Settings, color: 'bg-slate-600', role: 'admin', desc: 'Servicios, Médicos e Interconsultas' },
-                { id: 'usuarios', label: 'Gestión de Usuarios', icon: Icons.UserCog, color: 'bg-purple-600', role: 'admin', desc: 'Administrar accesos al sistema' }
-            ];
-
-            return (
-                <div className="w-full max-w-6xl mx-auto space-y-8 animate-in">
-                    {/* Header Welcome */}
-                    <div className="bg-gradient-to-r from-turquoise-600 to-clinical-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
-                        <div className="relative z-10">
-                            <h1 className="text-3xl font-bold brand-font mb-2">¡Hola, {userName || 'Usuario'}!</h1>
-                            <p className="opacity-90 text-sm font-medium uppercase tracking-wider">{role === 'superadmin' ? 'Super Administrador' : role === 'admin' ? 'Administrador' : 'Digitador Clínico'}</p>
-                        </div>
-                        <div className="absolute right-0 top-0 h-full w-1/2 bg-white/10 skew-x-12 transform origin-bottom-right"></div>
-                    </div>
-
-                    {/* Clock & Quote */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 flex flex-col justify-center items-center text-center">
-                            <div className="text-5xl font-mono font-bold text-slate-700 tracking-widest mb-2">{formatTime(time)}</div>
-                            <div className="text-sm text-slate-400 font-medium uppercase">{formatDate(time)}</div>
-                        </div>
-                        <div className="md:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-3xl shadow-soft text-white flex items-center relative overflow-hidden">
-                            <div className="absolute top-4 left-4 text-6xl opacity-10 font-serif">"</div>
-                            <p className="text-lg font-light italic relative z-10 pl-6 border-l-4 border-turquoise-400">{quote}</p>
-                        </div>
-                    </div>
-
-                    {/* Navigation Cards */}
-                    <h3 className="text-xl font-bold text-slate-700 brand-font mt-8">Accesos Directos</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {navCards.filter(c => c.role === 'all' || (role === 'superadmin') || (role === 'admin' && (c.role === 'admin' || c.role === 'all'))).map(card => (
-                            <button key={card.id} onClick={() => setView(card.id)} className="group relative bg-white p-6 rounded-3xl shadow-soft border border-slate-100 hover:shadow-xl transition-all duration-300 text-left hover:-translate-y-1 overflow-hidden">
-                                <div className={`absolute top-0 right-0 w-24 h-24 ${card.color} opacity-10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110`}></div>
-                                <div className={`w-12 h-12 rounded-2xl ${card.color} flex items-center justify-center text-white mb-4 shadow-md group-hover:scale-110 transition-transform`}>
-                                    <card.icon size={24} />
-                                </div>
-                                <h4 className="font-bold text-lg text-slate-800 mb-1 group-hover:text-turquoise-600 transition-colors">{card.label}</h4>
-                                <p className="text-xs text-slate-400">{card.desc}</p>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        // --- NEW: REPORTS & STATS MODULE ---
-        const ReportsBlock = ({ expedientes, patients, doctors, navigateToPatients }) => {
-            const [filter, setFilter] = useState('');
-            const [subView, setSubView] = useState(null); // 'waiting_list', 'all_exps', 'active', 'suspended', 'baja', 'doctors_dashboard', 'single_doctor_view'
-            const [selectedDoctor, setSelectedDoctor] = useState(null);
-            const [doctorTab, setDoctorTab] = useState('activo'); // 'activo', 'suspension', 'baja'
-            const [viewingExp, setViewingExp] = useState(null);
-            const [doctorAiQuery, setDoctorAiQuery] = useState('');
-            const [filteredDoctorExps, setFilteredDoctorExps] = useState(null); // For AI filtering results
-            const [isAiLoading, setIsAiLoading] = useState(false);
-            const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || GEMINI_API_KEY);
-            const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-
-            const stats = useMemo(() => ({
-                totalPatients: patients.length,
-                totalExps: expedientes.length,
-                active: expedientes.filter(e => e.estado === 'activo').length,
-                suspended: expedientes.filter(e => e.estado === 'suspension').length,
-                baja: expedientes.filter(e => e.estado === 'baja').length,
-                totalDoctors: doctors.length
-            }), [expedientes, patients, doctors]);
-
-            // General Lists logic
-            const currentList = useMemo(() => {
-                let d = [];
-                if (subView === 'waiting_list') {
-                    d = expedientes.filter(e => e.estado === 'activo').sort((a,b) => {
-                        const pA = a.prioridad || 'P3'; const pB = b.prioridad || 'P3';
-                        if (pA < pB) return -1; if (pA > pB) return 1;
-                        return new Date(a.fechaSolicitud) - new Date(b.fechaSolicitud);
-                    });
-                } else if (subView === 'all_exps') d = expedientes;
-                else if (subView === 'active') d = expedientes.filter(e => e.estado === 'activo');
-                else if (subView === 'suspended') d = expedientes.filter(e => e.estado === 'suspension');
-                else if (subView === 'baja') d = expedientes.filter(e => e.estado === 'baja');
-                
-                return d.filter(e => e.patientName?.toLowerCase().includes(filter.toLowerCase()) || e.diagnostico?.toLowerCase().includes(filter.toLowerCase()));
-            }, [expedientes, subView, filter]);
-
-            // Doctor Folder Logic
-            const currentDoctorExps = useMemo(() => {
-                if (!selectedDoctor) return [];
-                let base = expedientes.filter(e => e.doctorId === selectedDoctor.id && e.estado === doctorTab);
-                
-                // AI Filter Application
-                if (filteredDoctorExps) {
-                    base = base.filter(e => filteredDoctorExps.includes(e.id));
-                }
-
-                return base;
-            }, [expedientes, selectedDoctor, doctorTab, filteredDoctorExps]);
-
-            const handleDoctorAiSearch = async () => {
-                if (!doctorAiQuery.trim()) { setFilteredDoctorExps(null); return; }
-                const keyToUse = apiKey || GEMINI_API_KEY;
-                if (!keyToUse) { setShowApiKeyModal(true); return; }
-
-                setIsAiLoading(true);
-                try {
-                    // Create minimal context for AI
-                    const baseContext = expedientes.filter(e => e.doctorId === selectedDoctor.id && e.estado === doctorTab).map(e => ({
-                        id: e.id,
-                        paciente: e.patientName,
-                        diagnostico: e.diagnostico,
-                        procedimiento: e.procedimiento,
-                        edad: calculateAge(patients.find(p => p.id === e.patientId)?.fechaNacimiento),
-                        sexo: patients.find(p => p.id === e.patientId)?.sexo,
-                        domicilio: patients.find(p => p.id === e.patientId)?.domicilio
-                    }));
-
-                    const prompt = `Actúa como un filtro de datos médicos. Tengo esta lista de expedientes JSON: ${JSON.stringify(baseContext)}. El usuario busca: "${doctorAiQuery}". Devuelve UNICAMENTE un array JSON de strings con los IDs de los expedientes que coinciden. Ejemplo: ["id1", "id2"]. Si no hay coincidencias devuelve [].`;
-
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${keyToUse}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-
-                    const data = await response.json();
-                    let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-                    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const ids = JSON.parse(rawText);
-                    
-                    if (Array.isArray(ids)) {
-                        setFilteredDoctorExps(ids);
-                    } else {
-                        console.error("AI response not an array");
-                    }
-
-                } catch (err) {
-                    console.error("AI Filter Error", err);
-                    alert("Error al filtrar con IA. Verifique su conexión.");
-                } finally {
-                    setIsAiLoading(false);
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (newHospitalName.trim()) {
+                    onAdd(newHospitalName);
+                    setNewHospitalName('');
+                    setShowAddModal(false);
                 }
             };
-
-            const exportCSV = (data, filename) => {
-                if(!data || data.length === 0) { alert("No hay datos para exportar"); return; }
-                
-                const sep = ";";
-                const isPatientList = data[0].hasOwnProperty('nombres') && !data[0].hasOwnProperty('serviceName');
-                
-                let headers = "";
-                let rows = "";
-
-                const esc = (text) => {
-                    if (text === null || text === undefined) return '';
-                    return `"${String(text).replace(/"/g, '""')}"`;
-                };
-
-                if (isPatientList) {
-                    headers = ["Nombre", "Apellido", "DNI", "Afiliacion", "Edad", "Sexo", "Patrono", "Telefono", "Domicilio", "Total Exps", "Activos", "Suspendidos", "Baja"].join(sep) + "\n";
-                    rows = data.map(p => {
-                        const patientExps = expedientes.filter(e => e.patientId === p.id);
-                        const total = patientExps.length;
-                        const activos = patientExps.filter(e => e.estado === 'activo').length;
-                        const susp = patientExps.filter(e => e.estado === 'suspension').length;
-                        const baja = patientExps.filter(e => e.estado === 'baja').length;
-
-                        return [p.nombres, p.apellidos, p.dni, p.nAfiliacion, p.edad, p.sexo, p.patrono, p.telefonos, p.domicilio, total, activos, susp, baja].map(esc).join(sep)
-                    }).join("\n");
-                } else {
-                    const patientMap = patients.reduce((acc, p) => { acc[p.id] = p; return acc; }, {});
-                    headers = ["ID Paciente (DNI)", "Nombre Paciente", "Fecha Nacimiento", "Edad", "Sexo", "Patrono", "Domicilio", "Telefono", "Servicio", "Diagnostico", "Intervencion", "Medico", "Estado", "Dias Espera", "Fecha Solicitud"].join(sep) + "\n";
-                    rows = data.map(e => {
-                        const p = patientMap[e.patientId] || {}; 
-                        const dni = p.dni || 'N/A';
-                        const dias = calculateDaysWaiting(e.fechaSolicitud);
-                        return [dni, e.patientName, p.fechaNacimiento || '', p.edad || '', p.sexo || '', p.patrono || '', p.domicilio || '', p.telefonos || '', e.serviceName, e.diagnostico, e.procedimiento, e.doctorName, e.estado, dias, e.fechaSolicitud].map(esc).join(sep);
-                    }).join("\n");
-                }
-
-                const blob = new Blob(["\uFEFF" + headers + rows], { type: 'text/csv;charset=utf-8;' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-            };
-
-            const Card = ({ title, count, icon: Icon, color, onClick, onDownload, isPatient }) => (
-                <div onClick={onClick} className={`relative p-6 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer group overflow-hidden ${color} report-card`}>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{title}</p>
-                            <h3 className="text-3xl font-bold text-slate-800 brand-font"><AnimatedCounter value={count} /></h3>
-                        </div>
-                        <div className={`p-4 rounded-xl bg-gradient-to-br ${color.replace('border-', 'from-').replace('400', '100')} to-white text-slate-600 shadow-sm`}>
-                            <Icon size={28} />
-                        </div>
-                    </div>
-                    <div className="mt-6 flex gap-2 items-center">
-                        {onDownload && <button onClick={(e) => { e.stopPropagation(); onDownload(); }} className="p-2 rounded-lg bg-slate-50 hover:bg-slate-200 text-slate-500 transition-colors shadow-sm" title="Descargar CSV">
-                            <Icons.Download size={18} />
-                        </button>}
-                        <div className="h-px bg-slate-100 flex-1 mx-2"></div>
-                        <span className="text-[10px] font-bold text-slate-400 self-center flex items-center gap-1 group-hover:text-turquoise-600 transition-colors">Ver Detalles <Icons.ArrowRight size={12}/></span>
-                    </div>
-                </div>
-            );
-
-            if (subView === 'doctors_dashboard') {
-                return (
-                    <div className="glass-panel rounded-3xl shadow-soft flex flex-col h-full animate-in overflow-hidden border-0 bg-white">
-                        <div className="p-6 border-b border-slate-100 bg-white/50 backdrop-blur-md flex items-center gap-4">
-                            <button onClick={() => setSubView(null)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors btn-hover-effect"><Icons.ArrowLeft size={20}/></button>
-                            <div><h3 className="font-bold text-xl text-slate-800 brand-font">Carpetas Médicas</h3><p className="text-xs font-semibold text-turquoise-600">{doctors.length} Médicos Registrados</p></div>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-6 bg-slate-50">
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                                {doctors.map(doc => (
-                                    <div key={doc.id} onClick={() => { setSelectedDoctor(doc); setSubView('single_doctor_view'); setDoctorTab('activo'); setFilteredDoctorExps(null); setDoctorAiQuery(''); }} className="bg-white p-4 rounded-xl border border-slate-200 hover:border-turquoise-400 hover:shadow-md cursor-pointer flex flex-col items-center text-center gap-3 transition-all group">
-                                        <div className="bg-amber-100 p-3 rounded-full text-amber-600 group-hover:scale-110 transition-transform"><Icons.Folder size={32}/></div>
-                                        <div><h4 className="font-bold text-sm text-slate-700">{doc.name}</h4><p className="text-[10px] text-slate-400 mt-1">{expedientes.filter(e => e.doctorId === doc.id).length} Casos</p></div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (subView === 'single_doctor_view' && selectedDoctor) {
-                return (
-                    <div className="glass-panel rounded-3xl shadow-soft flex flex-col h-full animate-in overflow-hidden border-0 bg-white">
-                        <ExpedienteDetailModal exp={viewingExp} isOpen={!!viewingExp} onClose={() => setViewingExp(null)} />
-                        <Modal isOpen={showApiKeyModal} onClose={() => setShowApiKeyModal(false)} title="Configuración de IA">
-                            <div className="space-y-4">
-                                <p className="text-sm text-slate-500">Se necesita una API Key para filtrar con inteligencia artificial.</p>
-                                <input type="password" className="w-full p-3 border rounded-xl" placeholder="Pegar API Key aquí..." value={apiKey} onChange={e => setApiKey(e.target.value)} />
-                                <div className="flex justify-end"><button onClick={() => { localStorage.setItem('gemini_api_key', apiKey); setShowApiKeyModal(false); }} className="bg-turquoise-600 text-white px-4 py-2 rounded-xl font-bold">Guardar</button></div>
-                            </div>
-                        </Modal>
-
-                        <div className="p-6 border-b border-slate-100 bg-white/50 backdrop-blur-md">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="flex items-center gap-4">
-                                    <button onClick={() => setSubView('doctors_dashboard')} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors btn-hover-effect"><Icons.ArrowLeft size={20}/></button>
-                                    <div><h3 className="font-bold text-xl text-slate-800 brand-font">{selectedDoctor.name}</h3><p className="text-xs font-semibold text-slate-400">Carpeta Digital Personal</p></div>
-                                </div>
-                                <button onClick={() => exportCSV(currentDoctorExps, `Reporte_${selectedDoctor.name.replace(/\s/g,'_')}_${doctorTab}.csv`)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-md btn-hover-effect"><Icons.Download size={16}/> Exportar Lista</button>
-                            </div>
-                            
-                            <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
-                                <div className="flex p-1 bg-slate-100 rounded-xl">
-                                    {['activo', 'suspension', 'baja'].map(tab => (
-                                        <button key={tab} onClick={() => { setDoctorTab(tab); setFilteredDoctorExps(null); }} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${doctorTab === tab ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>{tab}</button>
-                                    ))}
-                                </div>
-                                <div className="flex gap-2 w-full md:w-auto">
-                                    <input type="text" placeholder="Filtro IA (ej: mujeres > 40 años)" className="flex-1 p-2 border border-slate-200 rounded-lg text-sm w-full md:w-64" value={doctorAiQuery} onChange={e => setDoctorAiQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleDoctorAiSearch()} />
-                                    <button onClick={handleDoctorAiSearch} disabled={isAiLoading} className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg btn-hover-effect disabled:opacity-50">{isAiLoading ? <Icons.Clock size={20} className="animate-spin"/> : <Icons.Bot size={20}/>}</button>
-                                    {filteredDoctorExps && <button onClick={() => { setFilteredDoctorExps(null); setDoctorAiQuery(''); }} className="text-xs text-red-500 font-bold hover:underline">Borrar Filtro</button>}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex-1 overflow-auto p-0">
-                            <table className="w-full text-left border-collapse min-w-[900px]">
-                                <thead className="bg-slate-50 sticky top-0 z-10"><tr className="text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200"><th className="px-6 py-3">Prioridad</th><th className="px-6 py-3">Paciente</th><th className="px-6 py-3">Diagnóstico</th><th className="px-6 py-3">Intervención</th><th className="px-6 py-3 text-right">Fecha Sol.</th></tr></thead>
-                                <tbody className="divide-y divide-slate-50">
-                                    {currentDoctorExps.map(e => (
-                                        <tr key={e.id} onClick={() => setViewingExp(e)} className="hover:bg-slate-50 transition-colors cursor-pointer group">
-                                            <td className="px-6 py-4"><span className={`px-2 py-1 rounded text-[10px] font-bold border uppercase ${PRIORIDADES[e.prioridad]?.color}`}>{PRIORIDADES[e.prioridad]?.label.split('.')[0]}</span></td>
-                                            <td className="px-6 py-4"><div className="font-bold text-slate-700 text-sm">{e.patientName}</div></td>
-                                            <td className="px-6 py-4 text-xs text-slate-600 max-w-xs truncate">{e.diagnostico || 'Sin diagnóstico'}</td>
-                                            <td className="px-6 py-4 text-xs text-slate-600 max-w-xs truncate">{e.procedimiento || '-'}</td>
-                                            <td className="px-6 py-4 text-right"><span className="font-mono text-xs text-slate-400">{e.fechaSolicitud}</span></td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                            {currentDoctorExps.length === 0 && <div className="p-10 text-center text-slate-400 border-2 border-dashed border-slate-100 m-6 rounded-xl">La carpeta está vacía para esta categoría o filtro.</div>}
-                        </div>
-                    </div>
-                );
-            }
-
-            if (!subView) {
-                // DASHBOARD VIEW
-                return (
-                    <div className="space-y-8 animate-in w-full max-w-7xl mx-auto">
-                        <div className="flex flex-col gap-2 mb-4">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-slate-800 brand-font">Panel de Reportes</h2>
-                                    <p className="text-sm text-slate-500">Visualice estadísticas generales y gestione carpetas médicas.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Standard Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <Card title="Lista de Espera Global" count={stats.active} icon={Icons.List} color="border-amber-400" onClick={() => setSubView('waiting_list')} />
-                            <Card title="Doctores" count={stats.totalDoctors} icon={Icons.Folder} color="border-indigo-400" onClick={() => setSubView('doctors_dashboard')} />
-                            <Card title="Pacientes Totales" count={stats.totalPatients} icon={Icons.Users} color="border-blue-400" onClick={navigateToPatients} onDownload={() => exportCSV(patients, 'LEQ_Pacientes.csv')} isPatient={true} />
-                            <Card title="Expedientes Totales" count={stats.totalExps} icon={Icons.FolderPlus} color="border-slate-400" onClick={() => setSubView('all_exps')} onDownload={() => exportCSV(expedientes, 'LEQ_TotalExpedientes.csv')} />
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card title="Expedientes Activos" count={stats.active} icon={Icons.Clock} color="border-green-400" onClick={() => setSubView('active')} onDownload={() => exportCSV(expedientes.filter(e => e.estado === 'activo'), 'LEQ_Activos.csv')} />
-                            <Card title="Expedientes Suspendidos" count={stats.suspended} icon={Icons.AlertCircle} color="border-orange-400" onClick={() => setSubView('suspended')} onDownload={() => exportCSV(expedientes.filter(e => e.estado === 'suspension'), 'LEQ_Suspendidos.csv')} />
-                            <Card title="Expedientes de Baja" count={stats.baja} icon={Icons.X} color="border-red-400" onClick={() => setSubView('baja')} onDownload={() => exportCSV(expedientes.filter(e => e.estado === 'baja'), 'LEQ_Baja.csv')} />
-                        </div>
-
-                        <ExpedienteDetailModal exp={viewingExp} isOpen={!!viewingExp} onClose={() => setViewingExp(null)} />
-                    </div>
-                );
-            }
-
-            // TABLE VIEW (Fallback for existing views)
-            const viewTitles = { 'waiting_list': 'Lista de Espera Global', 'all_exps': 'Todos los Expedientes', 'active': 'Expedientes Activos', 'suspended': 'Expedientes Suspendidos', 'baja': 'Expedientes de Baja' };
 
             return (
                 <div className="glass-panel rounded-3xl shadow-soft flex flex-col h-full animate-in overflow-hidden border-0 bg-white">
-                    <ExpedienteDetailModal exp={viewingExp} isOpen={!!viewingExp} onClose={() => setViewingExp(null)} />
+                    <ConfirmModal isOpen={!!confirmData} onClose={() => setConfirmData(null)} onConfirm={confirmData?.action} title={confirmData?.title} message={confirmData?.msg} />
                     
                     <div className="p-6 border-b border-slate-100 bg-white/50 backdrop-blur-md flex justify-between items-center">
                         <div className="flex items-center gap-4">
-                            <button onClick={() => setSubView(null)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors btn-hover-effect"><Icons.ArrowLeft size={20}/></button>
-                            <div><h3 className="font-bold text-xl text-slate-800 brand-font">{viewTitles[subView]}</h3><p className="text-xs font-semibold text-turquoise-600">{currentList.length} Registros encontrados</p></div>
+                            <div className="bg-gradient-to-br from-indigo-100 to-indigo-50 p-3 rounded-2xl text-indigo-600">
+                                <Icons.Hospital size={24} />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-xl text-slate-800 brand-font">Programa Mora 0</h3>
+                                <p className="text-xs font-semibold text-indigo-600">Gestión de Hospitales</p>
+                            </div>
                         </div>
-                        <div className="flex gap-3 items-center">
-                            <div className="relative w-64"><div className="absolute left-3 top-2.5 text-slate-400"><Icons.Search size={16}/></div><input type="text" placeholder="Filtrar por nombre..." className="w-full pl-10 pr-4 py-2.5 bg-slate-50 rounded-xl text-sm outline-none border border-transparent focus:border-turquoise-200 transition-all focus:shadow-sm" value={filter} onChange={e=>setFilter(e.target.value)} /></div>
-                            {subView !== 'waiting_list' && <button onClick={() => exportCSV(currentList, `LEQ_${subView}.csv`)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md btn-hover-effect"><Icons.Download size={16}/> Exportar Vista</button>}
-                        </div>
+                        <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md btn-hover-effect">
+                            <Icons.PlusCircle size={16}/> <span className="hidden sm:inline">Nuevo Hospital</span>
+                        </button>
                     </div>
-                    <div className="flex-1 overflow-auto p-0">
-                        <table className="w-full text-left border-collapse min-w-[900px]">
-                            <thead className="bg-slate-50 sticky top-0 z-10"><tr className="text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200"><th className="px-6 py-3">Prioridad</th><th className="px-6 py-3">Paciente / Servicio</th><th className="px-6 py-3">Diagnóstico</th><th className="px-6 py-3">Estado</th><th className="px-6 py-3 text-right">Detalle</th></tr></thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {currentList.map(e => (
-                                    <tr key={e.id} onClick={() => setViewingExp(e)} className={`hover:bg-slate-50 transition-colors cursor-pointer group ${getRowStyle(e.estado)}`}>
-                                        <td className="px-6 py-4"><span className={`px-2 py-1 rounded text-[10px] font-bold border uppercase ${PRIORIDADES[e.prioridad]?.color}`}>{PRIORIDADES[e.prioridad]?.label.split('.')[0]}</span></td>
-                                        <td className="px-6 py-4"><div className="font-bold text-slate-700 text-sm">{e.patientName}</div><div className="text-xs text-slate-400">{e.serviceName || 'General'}</div></td>
-                                        <td className="px-6 py-4 text-xs text-slate-600 max-w-xs truncate" title={e.diagnostico}>{e.diagnostico || 'Sin diagnóstico'}</td>
-                                        <td className="px-6 py-4"><span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${ESTADOS[e.estado]?.color}`}>{ESTADOS[e.estado]?.label}</span></td>
-                                        <td className="px-6 py-4 text-right"><div className="flex justify-end items-center gap-2 font-mono text-xs text-slate-400">{e.fechaSolicitud} <div className="p-1 rounded-full hover:bg-turquoise-50 text-slate-300 hover:text-turquoise-500 transition-colors"><Icons.Eye size={16}/></div></div></td>
-                                    </tr>
+
+                    <div className="flex-1 overflow-y-auto p-6 bg-slate-50">
+                        {hospitals.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+                                <Icons.Hospital size={48} className="mb-4 opacity-50" />
+                                <p>No hay hospitales registrados en el programa Mora 0.</p>
+                                <button onClick={() => setShowAddModal(true)} className="mt-4 text-indigo-600 font-bold hover:underline">Crear el primero</button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                {hospitals.map(hospital => (
+                                    <div key={hospital.id} className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:shadow-lg transition-all group relative overflow-hidden cursor-pointer">
+                                        <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); setConfirmData({ title: 'Eliminar Hospital', msg: `¿Desea eliminar ${hospital.name}?`, action: () => onDelete(hospital.id) }); }} 
+                                                className="text-slate-400 hover:text-red-500 bg-white rounded-full p-1 shadow-sm"
+                                            >
+                                                <Icons.Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                        <div className="bg-indigo-50 w-16 h-16 rounded-2xl flex items-center justify-center text-indigo-600 mb-4 group-hover:scale-110 transition-transform">
+                                            <Icons.Hospital size={32} />
+                                        </div>
+                                        <h4 className="font-bold text-lg text-slate-800 mb-1 truncate">{hospital.name}</h4>
+                                        <p className="text-xs text-slate-400">Mora 0</p>
+                                    </div>
                                 ))}
-                            </tbody>
-                        </table>
-                        {currentList.length === 0 && <div className="p-10 text-center text-slate-400 border-2 border-dashed border-slate-100 m-6 rounded-xl">No hay registros que coincidan con su búsqueda.</div>}
+                            </div>
+                        )}
                     </div>
+
+                    <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Nuevo Hospital - Mora 0">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wide ml-1 block mb-1">Nombre del Hospital</label>
+                                <input 
+                                    type="text" 
+                                    required 
+                                    className="w-full p-3 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-indigo-200 transition-all" 
+                                    value={newHospitalName} 
+                                    onChange={e => setNewHospitalName(e.target.value)} 
+                                    placeholder="Ej: Hospital Escuela"
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2 text-slate-500 font-bold text-sm hover:bg-slate-100 rounded-xl">Cancelar</button>
+                                <button type="submit" className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md">Crear</button>
+                            </div>
+                        </form>
+                    </Modal>
                 </div>
             );
         };
@@ -1147,6 +1320,7 @@
             const [role, setRole] = useState(null); const [userName, setUserName] = useState(null); const [view, setView] = useState('dashboard');
             const [patients, setPatients] = useState([]); const [expedientes, setExpedientes] = useState([]); const [systemUsers, setSystemUsers] = useState([]);
             const [services, setServices] = useState([]); const [specialties, setSpecialties] = useState([]); const [doctors, setDoctors] = useState([]); const [interconsultas, setInterconsultas] = useState([]);
+            const [mora0Hospitals, setMora0Hospitals] = useState([]); // Mora 0 State
             const [sidebarCollapsed, setSidebarCollapsed] = useState(false); const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
             useEffect(() => {
@@ -1183,6 +1357,8 @@
                 onSnapshot(collection(db, 'leq_specialties'), (s) => setSpecialties(s.docs.map(d=>({id:d.id, ...d.data()}))), handleError('specialties'));
                 onSnapshot(collection(db, 'leq_doctors'), (s) => setDoctors(s.docs.map(d=>({id:d.id, ...d.data()}))), handleError('doctors'));
                 onSnapshot(collection(db, 'leq_interconsultas'), (s) => setInterconsultas(s.docs.map(d=>({id:d.id, ...d.data()}))), handleError('interconsultas'));
+                // Mora 0 Listener
+                onSnapshot(collection(db, 'leq_mora0_hospitals'), (s) => setMora0Hospitals(s.docs.map(d=>({id:d.id, ...d.data()}))), handleError('mora0_hospitals'));
             };
 
             const handleLogout = async () => { if(auth) await signOut(auth); localStorage.removeItem('leq_role'); localStorage.removeItem('leq_username'); setRole(null); setUserName(null); setView('dashboard'); setPatients([]); };
@@ -1200,6 +1376,10 @@
             const handleUpdateUser = async (id, data) => { if(db) await updateDoc(doc(db, 'leq_users', id), data); };
             const handleDelUser = async (id) => { await deleteDoc(doc(db, 'leq_users',id)); };
             
+            // Mora 0 Handlers
+            const handleAddMora0Hospital = async (name) => { if(db) await addDoc(collection(db, 'leq_mora0_hospitals'), { name, createdAt: serverTimestamp() }); };
+            const handleDeleteMora0Hospital = async (id) => { await deleteDoc(doc(db, 'leq_mora0_hospitals', id)); };
+
             // Config Handlers
             const handleAddService = async (name) => { if(db) await addDoc(collection(db, 'leq_services'), { name }); };
             const handleDeleteService = async (id) => { await deleteDoc(doc(db, 'leq_services',id)); }; 
@@ -1221,7 +1401,15 @@
                     {mobileMenuOpen && (
                         <div className="fixed inset-0 z-50 bg-turquoise-900/95 backdrop-blur-sm flex flex-col md:hidden animate-in">
                             <div className="p-4 flex justify-between items-center border-b border-turquoise-800"><div className="font-bold text-white text-xl flex items-center gap-2 brand-font"><Icons.Activity/> LEQ Móvil</div><button onClick={() => setMobileMenuOpen(false)} className="text-white p-2 bg-turquoise-800 rounded-full btn-hover-effect"><Icons.X size={24}/></button></div>
-                            <div className="p-6 space-y-4"><NavItem id="dashboard" label="Dashboard" icon={Icons.LayoutDashboard} /><NavItem id="reports" label="Reportes" icon={Icons.List} /><NavItem id="pacientes" label="Gestión Pacientes" icon={Icons.Users} />{(role === 'admin' || role === 'superadmin') && <NavItem id="config" label="Configuración Clínica" icon={Icons.Settings} />}{(role === 'admin' || role === 'superadmin') && <NavItem id="usuarios" label="Gestión Usuarios" icon={Icons.UserCog} />}<div className="pt-8 border-t border-turquoise-800"><button onClick={handleLogout} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl bg-turquoise-800 text-white font-bold btn-hover-effect"><Icons.LogOut size={20}/> Desconectar</button></div></div>
+                            <div className="p-6 space-y-4">
+                                <NavItem id="dashboard" label="Dashboard" icon={Icons.LayoutDashboard} />
+                                <NavItem id="reports" label="Reportes" icon={Icons.List} />
+                                <NavItem id="pacientes" label="Gestión Pacientes" icon={Icons.Users} />
+                                {(role === 'admin' || role === 'superadmin') && <NavItem id="mora0" label="Mora 0" icon={Icons.Hospital} />}
+                                {(role === 'admin' || role === 'superadmin') && <NavItem id="config" label="Configuración" icon={Icons.Settings} />}
+                                {(role === 'admin' || role === 'superadmin') && <NavItem id="usuarios" label="Gestión Usuarios" icon={Icons.UserCog} />}
+                                <div className="pt-8 border-t border-turquoise-800"><button onClick={handleLogout} className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl bg-turquoise-800 text-white font-bold btn-hover-effect"><Icons.LogOut size={20}/> Desconectar</button></div>
+                            </div>
                         </div>
                     )}
                     <aside className={`${sidebarCollapsed ? 'w-24' : 'w-72'} bg-turquoise-900 text-turquoise-100 flex-col shadow-2xl z-20 hidden md:flex relative transition-all duration-300 ease-in-out`}>
@@ -1231,6 +1419,7 @@
                              <NavItem id="dashboard" label="Dashboard" icon={Icons.LayoutDashboard} />
                              <NavItem id="reports" label="Reportes" icon={Icons.List} />
                              <NavItem id="pacientes" label="Gestión Pacientes" icon={Icons.Users} />
+                             {(role === 'admin' || role === 'superadmin') && <NavItem id="mora0" label="Mora 0" icon={Icons.Hospital} />}
                              {(role === 'admin' || role === 'superadmin') && <NavItem id="config" label="Configuración" icon={Icons.Settings} />}
                              {(role === 'admin' || role === 'superadmin') && <NavItem id="usuarios" label="Gestión Usuarios" icon={Icons.UserCog} />}
                         </nav>
@@ -1246,6 +1435,7 @@
                             {view === 'dashboard' && <AdminDashboardBlock role={role} userName={userName} setView={setView} />}
                             {view === 'reports' && <ReportsBlock expedientes={expedientes} patients={patients} doctors={doctors} navigateToPatients={() => setView('pacientes')} />}
                             {view === 'pacientes' && <PatientManagementBlock patients={patients} expedientes={expedientes} services={services} specialties={specialties} doctors={doctors} interconsultas={interconsultas} onAddPatient={handleAddPatient} onUpdatePatient={handleUpdatePatient} onAddExpediente={handleAddExpediente} onUpdateExpediente={handleUpdateExpediente} onStatusChange={handleStatus} onDeletePatient={handleDeletePatient} onDeleteExpediente={handleDeleteExp} userRole={role} />}
+                            {view === 'mora0' && (role === 'admin' || role === 'superadmin') && <Mora0Block hospitals={mora0Hospitals} onAdd={handleAddMora0Hospital} onDelete={handleDeleteMora0Hospital} />}
                             {view === 'config' && (role === 'admin' || role === 'superadmin') && <ConfigBlock services={services} specialties={specialties} doctors={doctors} interconsultas={interconsultas} onAddService={handleAddService} onDeleteService={handleDeleteService} onAddSpecialty={handleAddSpecialty} onDeleteSpecialty={handleDeleteSpecialty} onAddDoctor={handleAddDoctor} onDeleteDoctor={handleDeleteDoctor} onAddInterconsulta={handleAddInterconsulta} onDeleteInterconsulta={handleDeleteInterconsulta} />}
                             {view === 'usuarios' && (role === 'admin' || role === 'superadmin') && <UserManagementBlock users={systemUsers} onAddUser={handleAddUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDelUser} currentUserRole={role} />}
                         </div>
