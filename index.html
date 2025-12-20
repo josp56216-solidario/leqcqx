@@ -143,7 +143,8 @@
             Download: (p) => <Icon {...p} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></>} />,
             Eye: (p) => <Icon {...p} path={<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></>} />,
             Send: (p) => <Icon {...p} path={<><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></>} />,
-            Bot: (p) => <Icon {...p} path={<><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></>} />
+            Bot: (p) => <Icon {...p} path={<><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></>} />,
+            Folder: (p) => <Icon {...p} path={<><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></>} />
         };
 
         // --- FIREBASE CONFIG (Usuario Especifico: leqihsscqx) ---
@@ -837,12 +838,14 @@
         };
 
         // --- NEW: REPORTS & STATS MODULE ---
-        const ReportsBlock = ({ expedientes, patients, navigateToPatients }) => {
+        const ReportsBlock = ({ expedientes, patients, doctors, navigateToPatients }) => {
             const [filter, setFilter] = useState('');
-            const [subView, setSubView] = useState(null); // 'waiting_list', 'all_exps', 'active', 'suspended', 'baja'
-            const [viewingExp, setViewingExp] = useState(null); // State for Read-Only Modal inside Reports
-            const [aiQuery, setAiQuery] = useState('');
-            const [aiResponse, setAiResponse] = useState(null); // { type: 'text' | 'chart' | 'table', data: ..., summary: '' }
+            const [subView, setSubView] = useState(null); // 'waiting_list', 'all_exps', 'active', 'suspended', 'baja', 'doctors_dashboard', 'single_doctor_view'
+            const [selectedDoctor, setSelectedDoctor] = useState(null);
+            const [doctorTab, setDoctorTab] = useState('activo'); // 'activo', 'suspension', 'baja'
+            const [viewingExp, setViewingExp] = useState(null);
+            const [doctorAiQuery, setDoctorAiQuery] = useState('');
+            const [filteredDoctorExps, setFilteredDoctorExps] = useState(null); // For AI filtering results
             const [isAiLoading, setIsAiLoading] = useState(false);
             const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || GEMINI_API_KEY);
             const [showApiKeyModal, setShowApiKeyModal] = useState(false);
@@ -852,10 +855,11 @@
                 totalExps: expedientes.length,
                 active: expedientes.filter(e => e.estado === 'activo').length,
                 suspended: expedientes.filter(e => e.estado === 'suspension').length,
-                baja: expedientes.filter(e => e.estado === 'baja').length
-            }), [expedientes, patients]);
+                baja: expedientes.filter(e => e.estado === 'baja').length,
+                totalDoctors: doctors.length
+            }), [expedientes, patients, doctors]);
 
-            // Filter logic based on subView
+            // General Lists logic
             const currentList = useMemo(() => {
                 let d = [];
                 if (subView === 'waiting_list') {
@@ -872,46 +876,39 @@
                 return d.filter(e => e.patientName?.toLowerCase().includes(filter.toLowerCase()) || e.diagnostico?.toLowerCase().includes(filter.toLowerCase()));
             }, [expedientes, subView, filter]);
 
-            const handleAiSubmit = async () => {
+            // Doctor Folder Logic
+            const currentDoctorExps = useMemo(() => {
+                if (!selectedDoctor) return [];
+                let base = expedientes.filter(e => e.doctorId === selectedDoctor.id && e.estado === doctorTab);
+                
+                // AI Filter Application
+                if (filteredDoctorExps) {
+                    base = base.filter(e => filteredDoctorExps.includes(e.id));
+                }
+
+                return base;
+            }, [expedientes, selectedDoctor, doctorTab, filteredDoctorExps]);
+
+            const handleDoctorAiSearch = async () => {
+                if (!doctorAiQuery.trim()) { setFilteredDoctorExps(null); return; }
                 const keyToUse = apiKey || GEMINI_API_KEY;
                 if (!keyToUse) { setShowApiKeyModal(true); return; }
-                if (!aiQuery.trim()) return;
 
                 setIsAiLoading(true);
-                setAiResponse(null);
-
                 try {
-                    // 1. Prepare Data Context (Optimized)
-                    const contextData = expedientes.map(e => ({
+                    // Create minimal context for AI
+                    const baseContext = expedientes.filter(e => e.doctorId === selectedDoctor.id && e.estado === doctorTab).map(e => ({
                         id: e.id,
                         paciente: e.patientName,
-                        servicio: e.serviceName,
-                        medico: e.doctorName,
                         diagnostico: e.diagnostico,
-                        estado: e.estado,
-                        fecha_solicitud: e.fechaSolicitud
+                        procedimiento: e.procedimiento,
+                        edad: calculateAge(patients.find(p => p.id === e.patientId)?.fechaNacimiento),
+                        sexo: patients.find(p => p.id === e.patientId)?.sexo,
+                        domicilio: patients.find(p => p.id === e.patientId)?.domicilio
                     }));
 
-                    const prompt = `
-                        Actúa como un analista de datos médicos. Tienes la siguiente base de datos de expedientes quirúrgicos en formato JSON:
-                        ${JSON.stringify(contextData).slice(0, 30000)} (Datos truncados si son muy largos).
+                    const prompt = `Actúa como un filtro de datos médicos. Tengo esta lista de expedientes JSON: ${JSON.stringify(baseContext)}. El usuario busca: "${doctorAiQuery}". Devuelve UNICAMENTE un array JSON de strings con los IDs de los expedientes que coinciden. Ejemplo: ["id1", "id2"]. Si no hay coincidencias devuelve [].`;
 
-                        El usuario pregunta: "${aiQuery}".
-
-                        Responde estrictamente en formato JSON con la siguiente estructura:
-                        {
-                            "type": "table" | "chart" | "text",
-                            "summary": "Breve resumen textual de la respuesta",
-                            "data": ... (Array de objetos para 'table', o configuración de Chart.js para 'chart')
-                        }
-
-                        Reglas:
-                        - Si es 'table', devuelve el array de objetos filtrados.
-                        - Si es 'chart', devuelve un objeto de configuración compatible con Chart.js (labels, datasets). Usa colores profesionales.
-                        - Si la pregunta no se puede responder con los datos, responde con type 'text' y una explicación.
-                    `;
-
-                    // 2. Call Gemini API
                     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${keyToUse}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -919,17 +916,19 @@
                     });
 
                     const data = await response.json();
-                    let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    
-                    // Clean code fences if present
+                    let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
                     rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const ids = JSON.parse(rawText);
                     
-                    const jsonResponse = JSON.parse(rawText);
-                    setAiResponse(jsonResponse);
+                    if (Array.isArray(ids)) {
+                        setFilteredDoctorExps(ids);
+                    } else {
+                        console.error("AI response not an array");
+                    }
 
-                } catch (error) {
-                    console.error("AI Error:", error);
-                    setAiResponse({ type: 'text', summary: "Hubo un error al procesar tu solicitud. Verifica tu API Key o intenta de nuevo." });
+                } catch (err) {
+                    console.error("AI Filter Error", err);
+                    alert("Error al filtrar con IA. Verifique su conexión.");
                 } finally {
                     setIsAiLoading(false);
                 }
@@ -966,7 +965,6 @@
                     rows = data.map(e => {
                         const p = patientMap[e.patientId] || {}; 
                         const dni = p.dni || 'N/A';
-                        const edad = p.edad || 'N/A';
                         const dias = calculateDaysWaiting(e.fechaSolicitud);
                         return [dni, e.patientName, p.fechaNacimiento || '', p.edad || '', p.sexo || '', p.patrono || '', p.domicilio || '', p.telefonos || '', e.serviceName, e.diagnostico, e.procedimiento, e.doctorName, e.estado, dias, e.fechaSolicitud].map(esc).join(sep);
                     }).join("\n");
@@ -998,18 +996,82 @@
                 </div>
             );
 
-            // Chart Renderer Component
-            const ChartRenderer = ({ config }) => {
-                const canvasRef = useRef(null);
-                useEffect(() => {
-                    if (canvasRef.current) {
-                        const ctx = canvasRef.current.getContext('2d');
-                        if (window.myChart) window.myChart.destroy();
-                        window.myChart = new Chart(ctx, config);
-                    }
-                }, [config]);
-                return <canvas ref={canvasRef} />;
-            };
+            if (subView === 'doctors_dashboard') {
+                return (
+                    <div className="glass-panel rounded-3xl shadow-soft flex flex-col h-full animate-in overflow-hidden border-0 bg-white">
+                        <div className="p-6 border-b border-slate-100 bg-white/50 backdrop-blur-md flex items-center gap-4">
+                            <button onClick={() => setSubView(null)} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors btn-hover-effect"><Icons.ArrowLeft size={20}/></button>
+                            <div><h3 className="font-bold text-xl text-slate-800 brand-font">Carpetas Médicas</h3><p className="text-xs font-semibold text-turquoise-600">{doctors.length} Médicos Registrados</p></div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 bg-slate-50">
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                {doctors.map(doc => (
+                                    <div key={doc.id} onClick={() => { setSelectedDoctor(doc); setSubView('single_doctor_view'); setDoctorTab('activo'); setFilteredDoctorExps(null); setDoctorAiQuery(''); }} className="bg-white p-4 rounded-xl border border-slate-200 hover:border-turquoise-400 hover:shadow-md cursor-pointer flex flex-col items-center text-center gap-3 transition-all group">
+                                        <div className="bg-amber-100 p-3 rounded-full text-amber-600 group-hover:scale-110 transition-transform"><Icons.Folder size={32}/></div>
+                                        <div><h4 className="font-bold text-sm text-slate-700">{doc.name}</h4><p className="text-[10px] text-slate-400 mt-1">{expedientes.filter(e => e.doctorId === doc.id).length} Casos</p></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (subView === 'single_doctor_view' && selectedDoctor) {
+                return (
+                    <div className="glass-panel rounded-3xl shadow-soft flex flex-col h-full animate-in overflow-hidden border-0 bg-white">
+                        <ExpedienteDetailModal exp={viewingExp} isOpen={!!viewingExp} onClose={() => setViewingExp(null)} />
+                        <Modal isOpen={showApiKeyModal} onClose={() => setShowApiKeyModal(false)} title="Configuración de IA">
+                            <div className="space-y-4">
+                                <p className="text-sm text-slate-500">Se necesita una API Key para filtrar con inteligencia artificial.</p>
+                                <input type="password" className="w-full p-3 border rounded-xl" placeholder="Pegar API Key aquí..." value={apiKey} onChange={e => setApiKey(e.target.value)} />
+                                <div className="flex justify-end"><button onClick={() => { localStorage.setItem('gemini_api_key', apiKey); setShowApiKeyModal(false); }} className="bg-turquoise-600 text-white px-4 py-2 rounded-xl font-bold">Guardar</button></div>
+                            </div>
+                        </Modal>
+
+                        <div className="p-6 border-b border-slate-100 bg-white/50 backdrop-blur-md">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="flex items-center gap-4">
+                                    <button onClick={() => setSubView('doctors_dashboard')} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors btn-hover-effect"><Icons.ArrowLeft size={20}/></button>
+                                    <div><h3 className="font-bold text-xl text-slate-800 brand-font">{selectedDoctor.name}</h3><p className="text-xs font-semibold text-slate-400">Carpeta Digital Personal</p></div>
+                                </div>
+                                <button onClick={() => exportCSV(currentDoctorExps, `Reporte_${selectedDoctor.name.replace(/\s/g,'_')}_${doctorTab}.csv`)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-md btn-hover-effect"><Icons.Download size={16}/> Exportar Lista</button>
+                            </div>
+                            
+                            <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
+                                <div className="flex p-1 bg-slate-100 rounded-xl">
+                                    {['activo', 'suspension', 'baja'].map(tab => (
+                                        <button key={tab} onClick={() => { setDoctorTab(tab); setFilteredDoctorExps(null); }} className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${doctorTab === tab ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>{tab}</button>
+                                    ))}
+                                </div>
+                                <div className="flex gap-2 w-full md:w-auto">
+                                    <input type="text" placeholder="Filtro IA (ej: mujeres > 40 años)" className="flex-1 p-2 border border-slate-200 rounded-lg text-sm w-full md:w-64" value={doctorAiQuery} onChange={e => setDoctorAiQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleDoctorAiSearch()} />
+                                    <button onClick={handleDoctorAiSearch} disabled={isAiLoading} className="bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-lg btn-hover-effect disabled:opacity-50">{isAiLoading ? <Icons.Clock size={20} className="animate-spin"/> : <Icons.Bot size={20}/>}</button>
+                                    {filteredDoctorExps && <button onClick={() => { setFilteredDoctorExps(null); setDoctorAiQuery(''); }} className="text-xs text-red-500 font-bold hover:underline">Borrar Filtro</button>}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 overflow-auto p-0">
+                            <table className="w-full text-left border-collapse min-w-[900px]">
+                                <thead className="bg-slate-50 sticky top-0 z-10"><tr className="text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200"><th className="px-6 py-3">Prioridad</th><th className="px-6 py-3">Paciente</th><th className="px-6 py-3">Diagnóstico</th><th className="px-6 py-3">Intervención</th><th className="px-6 py-3 text-right">Fecha Sol.</th></tr></thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {currentDoctorExps.map(e => (
+                                        <tr key={e.id} onClick={() => setViewingExp(e)} className="hover:bg-slate-50 transition-colors cursor-pointer group">
+                                            <td className="px-6 py-4"><span className={`px-2 py-1 rounded text-[10px] font-bold border uppercase ${PRIORIDADES[e.prioridad]?.color}`}>{PRIORIDADES[e.prioridad]?.label.split('.')[0]}</span></td>
+                                            <td className="px-6 py-4"><div className="font-bold text-slate-700 text-sm">{e.patientName}</div></td>
+                                            <td className="px-6 py-4 text-xs text-slate-600 max-w-xs truncate">{e.diagnostico || 'Sin diagnóstico'}</td>
+                                            <td className="px-6 py-4 text-xs text-slate-600 max-w-xs truncate">{e.procedimiento || '-'}</td>
+                                            <td className="px-6 py-4 text-right"><span className="font-mono text-xs text-slate-400">{e.fechaSolicitud}</span></td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            {currentDoctorExps.length === 0 && <div className="p-10 text-center text-slate-400 border-2 border-dashed border-slate-100 m-6 rounded-xl">La carpeta está vacía para esta categoría o filtro.</div>}
+                        </div>
+                    </div>
+                );
+            }
 
             if (!subView) {
                 // DASHBOARD VIEW
@@ -1019,105 +1081,31 @@
                             <div className="flex justify-between items-center">
                                 <div>
                                     <h2 className="text-2xl font-bold text-slate-800 brand-font">Panel de Reportes</h2>
-                                    <p className="text-sm text-slate-500">Visualice estadísticas generales y utilice la IA para reportes avanzados.</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => setShowApiKeyModal(true)} className="p-2 text-slate-400 hover:text-turquoise-600 rounded-lg border border-slate-200"><Icons.Settings size={20}/></button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* AI Assistant Section */}
-                        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-3xl border border-indigo-100 shadow-sm">
-                            <div className="flex items-start gap-4">
-                                <div className="bg-white p-3 rounded-2xl shadow-sm text-indigo-600"><Icons.Bot size={32}/></div>
-                                <div className="flex-1 w-full">
-                                    <h3 className="font-bold text-lg text-indigo-900 mb-1">Asistente Inteligente</h3>
-                                    <p className="text-sm text-indigo-600/80 mb-4">Pídeme reportes específicos, gráficos comparativos o análisis de datos.</p>
-                                    
-                                    <div className="flex gap-2 w-full">
-                                        <input 
-                                            type="text" 
-                                            className="flex-1 p-3 rounded-xl border border-indigo-200 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
-                                            placeholder="Ej: 'Gráfico de cirugías activas por servicio', 'Lista de pacientes del Dr. Perez'..." 
-                                            value={aiQuery}
-                                            onChange={e => setAiQuery(e.target.value)}
-                                            onKeyDown={e => e.key === 'Enter' && handleAiSubmit()}
-                                        />
-                                        <button onClick={handleAiSubmit} disabled={isAiLoading} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 rounded-xl font-bold btn-hover-effect disabled:opacity-50">
-                                            {isAiLoading ? 'Pensando...' : <Icons.Send size={20}/>}
-                                        </button>
-                                    </div>
-
-                                    {/* AI Response Area */}
-                                    {aiResponse && (
-                                        <div className="mt-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 animate-in">
-                                            <p className="text-sm text-slate-600 mb-4 font-medium italic">"{aiResponse.summary}"</p>
-                                            
-                                            {aiResponse.type === 'table' && (
-                                                <div>
-                                                    <div className="flex justify-end mb-2">
-                                                        <button onClick={() => exportCSV(aiResponse.data, 'Reporte_IA.csv')} className="text-xs flex items-center gap-1 font-bold text-turquoise-600 hover:underline"><Icons.Download size={14}/> Descargar CSV</button>
-                                                    </div>
-                                                    <div className="overflow-x-auto max-h-64 border rounded-lg">
-                                                        <table className="w-full text-xs text-left">
-                                                            <thead className="bg-slate-50 sticky top-0">
-                                                                <tr>
-                                                                    {Object.keys(aiResponse.data[0] || {}).map(key => <th key={key} className="p-2 border-b uppercase">{key}</th>)}
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {aiResponse.data.map((row, i) => (
-                                                                    <tr key={i} className="hover:bg-slate-50 border-b cursor-pointer" onClick={() => {
-                                                                        const fullExp = expedientes.find(e => e.id === row.id);
-                                                                        if(fullExp) setViewingExp(fullExp);
-                                                                    }}>
-                                                                        {Object.values(row).map((val, j) => <td key={j} className="p-2">{val}</td>)}
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {aiResponse.type === 'chart' && (
-                                                <div className="h-64 w-full">
-                                                    <ChartRenderer config={aiResponse.data} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                    <p className="text-sm text-slate-500">Visualice estadísticas generales y gestione carpetas médicas.</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Standard Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <Card title="Lista de Espera Global" count={stats.active} icon={Icons.List} color="border-amber-400" onClick={() => setSubView('waiting_list')} />
+                            <Card title="Doctores" count={stats.totalDoctors} icon={Icons.Folder} color="border-indigo-400" onClick={() => setSubView('doctors_dashboard')} />
                             <Card title="Pacientes Totales" count={stats.totalPatients} icon={Icons.Users} color="border-blue-400" onClick={navigateToPatients} onDownload={() => exportCSV(patients, 'LEQ_Pacientes.csv')} isPatient={true} />
-                            <Card title="Total Expedientes" count={stats.totalExps} icon={Icons.FolderPlus} color="border-slate-400" onClick={() => setSubView('all_exps')} onDownload={() => exportCSV(expedientes, 'LEQ_TotalExpedientes.csv')} />
+                            <Card title="Expedientes Totales" count={stats.totalExps} icon={Icons.FolderPlus} color="border-slate-400" onClick={() => setSubView('all_exps')} onDownload={() => exportCSV(expedientes, 'LEQ_TotalExpedientes.csv')} />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <Card title="Expedientes Activos" count={stats.active} icon={Icons.Clock} color="border-green-400" onClick={() => setSubView('active')} onDownload={() => exportCSV(expedientes.filter(e => e.estado === 'activo'), 'LEQ_Activos.csv')} />
                             <Card title="Expedientes Suspendidos" count={stats.suspended} icon={Icons.AlertCircle} color="border-orange-400" onClick={() => setSubView('suspended')} onDownload={() => exportCSV(expedientes.filter(e => e.estado === 'suspension'), 'LEQ_Suspendidos.csv')} />
                             <Card title="Expedientes de Baja" count={stats.baja} icon={Icons.X} color="border-red-400" onClick={() => setSubView('baja')} onDownload={() => exportCSV(expedientes.filter(e => e.estado === 'baja'), 'LEQ_Baja.csv')} />
                         </div>
 
-                        {/* API Key Modal */}
-                        <Modal isOpen={showApiKeyModal} onClose={() => setShowApiKeyModal(false)} title="Configuración de IA">
-                            <div className="space-y-4">
-                                <p className="text-sm text-slate-500">Para usar las funciones de Inteligencia Artificial, necesitas una API Key de Google Gemini.</p>
-                                <input type="password" className="w-full p-3 border rounded-xl" placeholder="Pegar API Key aquí..." value={apiKey} onChange={e => setApiKey(e.target.value)} />
-                                <div className="flex justify-end">
-                                    <button onClick={() => { localStorage.setItem('gemini_api_key', apiKey); setShowApiKeyModal(false); }} className="bg-turquoise-600 text-white px-4 py-2 rounded-xl font-bold">Guardar</button>
-                                </div>
-                            </div>
-                        </Modal>
                         <ExpedienteDetailModal exp={viewingExp} isOpen={!!viewingExp} onClose={() => setViewingExp(null)} />
                     </div>
                 );
             }
 
-            // TABLE VIEW
+            // TABLE VIEW (Fallback for existing views)
             const viewTitles = { 'waiting_list': 'Lista de Espera Global', 'all_exps': 'Todos los Expedientes', 'active': 'Expedientes Activos', 'suspended': 'Expedientes Suspendidos', 'baja': 'Expedientes de Baja' };
 
             return (
@@ -1256,7 +1244,7 @@
                         <div className="md:hidden bg-white/80 backdrop-blur-md p-4 shadow-sm flex justify-between items-center z-20"><button onClick={() => setMobileMenuOpen(true)} className="text-slate-600 p-1 btn-hover-effect"><Icons.Menu size={24}/></button><div className="font-bold text-slate-800 flex items-center gap-2 brand-font"><Icons.Activity size={18} className="text-turquoise-600"/> LEQ Móvil</div><div className="w-8"></div></div>
                         <div className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth relative z-10">
                             {view === 'dashboard' && <AdminDashboardBlock role={role} userName={userName} setView={setView} />}
-                            {view === 'reports' && <ReportsBlock expedientes={expedientes} patients={patients} navigateToPatients={() => setView('pacientes')} />}
+                            {view === 'reports' && <ReportsBlock expedientes={expedientes} patients={patients} doctors={doctors} navigateToPatients={() => setView('pacientes')} />}
                             {view === 'pacientes' && <PatientManagementBlock patients={patients} expedientes={expedientes} services={services} specialties={specialties} doctors={doctors} interconsultas={interconsultas} onAddPatient={handleAddPatient} onUpdatePatient={handleUpdatePatient} onAddExpediente={handleAddExpediente} onUpdateExpediente={handleUpdateExpediente} onStatusChange={handleStatus} onDeletePatient={handleDeletePatient} onDeleteExpediente={handleDeleteExp} userRole={role} />}
                             {view === 'config' && (role === 'admin' || role === 'superadmin') && <ConfigBlock services={services} specialties={specialties} doctors={doctors} interconsultas={interconsultas} onAddService={handleAddService} onDeleteService={handleDeleteService} onAddSpecialty={handleAddSpecialty} onDeleteSpecialty={handleDeleteSpecialty} onAddDoctor={handleAddDoctor} onDeleteDoctor={handleDeleteDoctor} onAddInterconsulta={handleAddInterconsulta} onDeleteInterconsulta={handleDeleteInterconsulta} />}
                             {view === 'usuarios' && (role === 'admin' || role === 'superadmin') && <UserManagementBlock users={systemUsers} onAddUser={handleAddUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDelUser} currentUserRole={role} />}
